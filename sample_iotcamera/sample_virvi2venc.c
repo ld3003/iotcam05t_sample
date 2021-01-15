@@ -334,6 +334,8 @@ int venc_main(int argc, char *argv[])
         MPP_SYS_CONF_S mSysConf;
         memset(&mSysConf, 0, sizeof(MPP_SYS_CONF_S));
         mSysConf.nAlignWidth = 32;
+
+        //初始化 mpp 系统
         QG_MPI_SYS_SetConf(&mSysConf);
         ret = QG_MPI_SYS_Init();
         if (ret < 0)
