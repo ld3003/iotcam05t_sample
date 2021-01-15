@@ -42,6 +42,8 @@ SRCCS := \
     wsclient.cpp \
     wskt.cpp \
     serialport.cpp \
+    sample_virvi2venc.c \
+    sample_ai2aenc.c \
     
 
 SRCS += $(wildcard ./JSON/*.c)
