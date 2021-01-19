@@ -61,14 +61,14 @@ typedef struct SampleVirvi2VencConfparser
     SampleVirvi2VencConfig mConfigPara;
     FILE *mOutputFileFp;
 
-    VENC_CHN mVeChn;
+    VENC_CHN mVeChn[2];
 
     ISP_DEV mIspDev;
     VI_DEV mViDev;
     //VI_CHN mViChn;
 
     VI_ATTR_S mViAttr;
-    VENC_CHN_ATTR_S mVEncChnAttr;
+    VENC_CHN_ATTR_S mVEncChnAttr[2];
     VENC_FRAME_RATE_S mVencFrameRateConfig;
 
     VI2Venc_Cap_S privCap[MAX_VIPP_DEV_NUM][MAX_VIR_CHN_NUM];

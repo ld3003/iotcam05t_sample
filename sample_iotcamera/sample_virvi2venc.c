@@ -30,7 +30,7 @@
 #include "media/mpi_isp.h"
 #include "media/mpi_venc.h"
 #include "media/mpi_sys.h"
-#include "mm_common.h"x
+#include "mm_common.h" x
 #include "mm_comm_venc.h"
 #include "mm_comm_rc.h"
 #include <mpi_videoformat_conversion.h>
@@ -73,16 +73,16 @@ int hal_virvi_start(VI_DEV ViDev, VI_CHN ViCh, void *pAttr)
     int ret = -1;
 
     ret = QG_MPI_VI_CreateVirChn(ViDev, ViCh, pAttr);
-    if(ret < 0)
+    if (ret < 0)
     {
-        aloge("Create VI Chn failed,VIDev = %d,VIChn = %d",ViDev,ViCh);
-        return ret ;
+        aloge("Create VI Chn failed,VIDev = %d,VIChn = %d", ViDev, ViCh);
+        return ret;
     }
     ret = QG_MPI_VI_SetVirChnAttr(ViDev, ViCh, pAttr);
-    if(ret < 0)
+    if (ret < 0)
     {
-        aloge("Set VI ChnAttr failed,VIDev = %d,VIChn = %d",ViDev,ViCh);
-        return ret ;
+        aloge("Set VI ChnAttr failed,VIDev = %d,VIChn = %d", ViDev, ViCh);
+        return ret;
     }
     return 0;
 }
@@ -100,116 +100,12 @@ int hal_virvi_end(VI_DEV ViDev, VI_CHN ViCh)
     }
 #endif
     ret = QG_MPI_VI_DestoryVirChn(ViDev, ViCh);
-    if(ret < 0)
+    if (ret < 0)
     {
-        aloge("Destory VI Chn failed,VIDev = %d,VIChn = %d",ViDev,ViCh);
-        return ret ;
+        aloge("Destory VI Chn failed,VIDev = %d,VIChn = %d", ViDev, ViCh);
+        return ret;
     }
     return 0;
-}
-
-static int ParseCmdLine(int argc, char **argv, SampleVirvi2VencCmdLineParam *pCmdLinePara)
-{
-    alogd("sample virvi2venc path:[%s], arg number is [%d]", argv[0], argc);
-    int ret = 0;
-    int i=1;
-    memset(pCmdLinePara, 0, sizeof(SampleVirvi2VencCmdLineParam));
-    while(i < argc)
-    {
-        if(!strcmp(argv[i], "-path"))
-        {
-            if(++i >= argc)
-            {
-                aloge("fatal error! use -h to learn how to set parameter!!!");
-                ret = -1;
-                break;
-            }
-            if(strlen(argv[i]) >= MAX_FILE_PATH_SIZE)
-            {
-                aloge("fatal error! file path[%s] too long: [%d]>=[%d]!", argv[i], strlen(argv[i]), MAX_FILE_PATH_SIZE);
-            }
-            strncpy(pCmdLinePara->mConfigFilePath, argv[i], MAX_FILE_PATH_SIZE-1);
-            pCmdLinePara->mConfigFilePath[MAX_FILE_PATH_SIZE-1] = '\0';
-        }
-        else if(!strcmp(argv[i], "-h"))
-        {
-            alogd("CmdLine param:\n"
-                "\t-path /home/sample_virvi2venc.conf\n");
-            ret = 1;
-            break;
-        }
-        else
-        {
-            alogd("ignore invalid CmdLine param:[%s], type -h to get how to set parameter!", argv[i]);
-        }
-        i++;
-    }
-    return ret;
-}
-
-static ERRORTYPE loadSampleVirvi2VencConfig(SampleVirvi2VencConfig *pConfig, const char *conf_path)
-{
-    int ret;
-    char *ptr;
-    CONFPARSER_S stConfParser;
-    ret = createConfParser(conf_path, &stConfParser);
-    if(ret < 0)
-    {
-        aloge("load conf fail");
-        return FAILURE;
-    }
-    memset(pConfig, 0, sizeof(SampleVirvi2VencConfig));
-    ptr = (char*)GetConfParaString(&stConfParser, SAMPLE_Virvi2Venc_Output_File_Path, NULL);
-    strncpy(pConfig->OutputFilePath, ptr, MAX_FILE_PATH_SIZE-1);
-    pConfig->OutputFilePath[MAX_FILE_PATH_SIZE-1] = '\0';
-    pConfig->AutoTestCount = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Auto_Test_Count, 0);
-    pConfig->EncoderCount = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Encoder_Count, 0);
-    pConfig->DevNum = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Dev_Num, 0);
-    pConfig->SrcFrameRate = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Src_Frame_Rate, 0);
-    pConfig->SrcWidth = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Src_Width, 0);
-    pConfig->SrcHeight = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Src_Height, 0);
-    char *pStrPixelFormat = (char*)GetConfParaString(&stConfParser, SAMPLE_Virvi2Venc_Dest_Format, NULL);
-    if(!strcmp(pStrPixelFormat, "nv21"))
-    {
-        pConfig->DestPicFormat = MM_PIXEL_FORMAT_YVU_SEMIPLANAR_420;
-    }
-    else if(!strcmp(pStrPixelFormat, "lbc25"))
-    {
-        aloge("fatal error! conf file pic_format must be yuv420sp");
-        pConfig->DestPicFormat = MM_PIXEL_FORMAT_YUV_QG_LBC_2_5X;
-    }
-    else
-    { 
-        pConfig->DestPicFormat = MM_PIXEL_FORMAT_YUV_SEMIPLANAR_420;
-    }
-    char *EncoderType = (char*)GetConfParaString(&stConfParser, SAMPLE_Virvi2Venc_Dest_Encoder_Type, NULL);
-    if(!strcmp(EncoderType, "H.264"))
-    {
-        pConfig->EncoderType = PT_H264;
-    }
-    else if(!strcmp(EncoderType, "H.265"))
-    {
-        pConfig->EncoderType = PT_H265;
-    }
-    else if(!strcmp(EncoderType, "MJPEG"))
-    {
-        pConfig->EncoderType = PT_MJPEG;
-    }
-    else
-    {
-        alogw("unsupported venc type:%p,encoder type turn to H.264!",EncoderType);
-        pConfig->EncoderType = PT_H264;
-    }
-    pConfig->DestWidth = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Dest_Width, 0);
-    pConfig->DestHeight = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Dest_Height, 0);
-    pConfig->DestFrameRate = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Dest_Frame_Rate, 0);
-    pConfig->DestBitRate = GetConfParaInt(&stConfParser, SAMPLE_Virvi2Venc_Dest_Bit_Rate, 0);
-    alogd("dev_num=%d, src_width=%d, src_height=%d, src_frame_rate=%d",
-       pConfig->DevNum,pConfig->SrcWidth,pConfig->SrcHeight,pConfig->SrcFrameRate);
-    alogd("dest_width=%d, dest_height=%d, dest_frame_rate=%d, dest_bit_rate=%d",
-       pConfig->DestWidth,pConfig->DestHeight,pConfig->SrcFrameRate,pConfig->DestBitRate);
-    destroyConfParser(&stConfParser);
-    return SUCCESS;
 }
 
 static void *GetEncoderFrameThread(void *pArg)
@@ -227,55 +123,56 @@ static void *GetEncoderFrameThread(void *pArg)
     VencFrame.mpPack = &venc_pack;
     alogd("Cap threadid=0x%lx, ViDev = %d, ViCh = %d\n", pCap->thid, nViDev, nViChn);
 
-    if (nVencChn >= 0 && nViChn >= 0) 
+    if (nVencChn >= 0 && nViChn >= 0)
     {
         MPP_CHN_S ViChn = {MOD_ID_VIU, nViDev, nViChn};
         MPP_CHN_S VeChn = {MOD_ID_VENC, 0, nVencChn};
-        ret = QG_MPI_SYS_Bind(&ViChn,&VeChn);
-        if(ret !=SUCCESS)
+        ret = QG_MPI_SYS_Bind(&ViChn, &VeChn);
+        if (ret != SUCCESS)
         {
             alogd("error!!! vi can not bind venc!!!\n");
-            return (void*)FAILURE;
+            return (void *)FAILURE;
         }
     }
     //alogd("start start recv success!\n");
     ret = QG_MPI_VI_EnableVirChn(nViDev, nViChn);
-    if (ret != SUCCESS) 
+    if (ret != SUCCESS)
     {
         alogd("VI enable error!");
-        return (void*)FAILURE;
+        return (void *)FAILURE;
     }
     ret = QG_MPI_VENC_StartRecvPic(nVencChn);
-    if (ret != SUCCESS) 
+    if (ret != SUCCESS)
     {
         alogd("VENC Start RecvPic error!");
-        return (void*)FAILURE;
+        return (void *)FAILURE;
     }
 
-    while(count != gpSampleVirvi2VencContext->mConfigPara.EncoderCount)
+    for (;;)
     {
-        count++;
-        if((ret = QG_MPI_VENC_GetStream(nVencChn, &VencFrame, 4000)) < 0) //6000(25fps) 4000(30fps)
+        if ((ret = QG_MPI_VENC_GetStream(nVencChn, &VencFrame, 4000)) < 0) //6000(25fps) 4000(30fps)
         {
             alogd("get first frmae failed!\n");
             continue;
         }
         else
         {
-            if(VencFrame.mpPack != NULL && VencFrame.mpPack->mLen0)
+            if (VencFrame.mpPack != NULL && VencFrame.mpPack->mLen0)
             {
-                fwrite(VencFrame.mpPack->mpAddr0,1,VencFrame.mpPack->mLen0, gpSampleVirvi2VencContext->mOutputFileFp);
+                printf("write encode CHN: %d %fKB\n", nViChn,(float)VencFrame.mpPack->mLen0/1024);
+                //fwrite(VencFrame.mpPack->mpAddr0, 1, VencFrame.mpPack->mLen0, gpSampleVirvi2VencContext->mOutputFileFp);
             }
-            if(VencFrame.mpPack != NULL && VencFrame.mpPack->mLen1)
+            if (VencFrame.mpPack != NULL && VencFrame.mpPack->mLen1)
             {
-                fwrite(VencFrame.mpPack->mpAddr1,1,VencFrame.mpPack->mLen1, gpSampleVirvi2VencContext->mOutputFileFp);
+                printf("write encode CHN: %d %fKB\n", nViChn,(float)VencFrame.mpPack->mLen1/1024);
+                //fwrite(VencFrame.mpPack->mpAddr1, 1, VencFrame.mpPack->mLen1, gpSampleVirvi2VencContext->mOutputFileFp);
             }
             ret = QG_MPI_VENC_ReleaseStream(nVencChn, &VencFrame);
-            if(ret < 0)
+            if (ret < 0)
             {
                 alogd("falied error,release failed!!!\n");
             }
-         }
+        }
     }
     return NULL;
 }
@@ -291,19 +188,19 @@ void Virvi2Venc_HELP()
 [parameter]
 auto_test_count = 1
 encoder_count = 1800
-# src parameter
-# dev number:0~3, vipp_number
-# src_width * src_height:720p/1080p;
-# src_frame_rate: 25
+#src parameter
+#dev number : 0 ~3, vipp_number
+#src_width *src_height : 720p / 1080p;
+#src_frame_rate : 25
 dev_num = 0
 src_width = 1920
 src_height = 1080
 src_frame_rate = 20
-# dest parameter
-# dest_encoder_type is H.264/H.265/MJPEG
-# dest_width * dest_height is VGA;
-# dest_frame_rate is 25
-# pic_format is nv21(to enc pixelfmt must be yuv420sp)
+#dest parameter
+#dest_encoder_type is H .264 / H .265 / MJPEG
+#dest_width *dest_height is VGA;
+#dest_frame_rate is 25
+#pic_format is nv21(to enc pixelfmt must be yuv420sp)
 dest_encoder_type = H.265
 dest_width = 1920
 dest_height = 1080
@@ -316,29 +213,34 @@ output_file_path = "QG_VirviEncoder.H265"
 
 int venc_main(int argc, char *argv[])
 {
-    int ret, count = 0,result = 0;
+    int ret, count = 0, result = 0;
     //int vipp_dev;
     int virvi_chn;
     //int isp_dev;
 
+    SampleVirvi2VencConfparser *pContext = (SampleVirvi2VencConfparser *)malloc(sizeof(SampleVirvi2VencConfparser));
+    gpSampleVirvi2VencContext = pContext;
+    memset(pContext, 0, sizeof(SampleVirvi2VencConfparser));
+
+#if 0
     printf("sample_virvi2venc buile time = %s, %s.\r\n", __DATE__, __TIME__);
     if (argc != 3)
     {
         Virvi2Venc_HELP();
         exit(0);
     }
-    SampleVirvi2VencConfparser *pContext = (SampleVirvi2VencConfparser*)malloc(sizeof(SampleVirvi2VencConfparser));
+    SampleVirvi2VencConfparser *pContext = (SampleVirvi2VencConfparser *)malloc(sizeof(SampleVirvi2VencConfparser));
     gpSampleVirvi2VencContext = pContext;
     memset(pContext, 0, sizeof(SampleVirvi2VencConfparser));
     /* parse command line param,read sample_virvi2venc.conf */
-    if(ParseCmdLine(argc, argv, &pContext->mCmdLinePara) != 0)
+    if (ParseCmdLine(argc, argv, &pContext->mCmdLinePara) != 0)
     {
         aloge("fatal error! command line param is wrong, exit!");
         result = -1;
         goto _exit;
     }
     char *pConfigFilePath;
-    if(strlen(pContext->mCmdLinePara.mConfigFilePath) > 0)
+    if (strlen(pContext->mCmdLinePara.mConfigFilePath) > 0)
     {
         pConfigFilePath = pContext->mCmdLinePara.mConfigFilePath;
     }
@@ -347,19 +249,21 @@ int venc_main(int argc, char *argv[])
         pConfigFilePath = DEFAULT_SAMPLE_VIPP2VENC_CONF_PATH;
     }
     /* parse config file. */
-    if(loadSampleVirvi2VencConfig(&pContext->mConfigPara, pConfigFilePath) != SUCCESS)
+    if (loadSampleVirvi2VencConfig(&pContext->mConfigPara, pConfigFilePath) != SUCCESS)
     {
         aloge("fatal error! no config file or parse conf file fail");
         result = -1;
         goto _exit;
     }
-    
-    while(count != pContext->mConfigPara.AutoTestCount)
+
+#endif
+
+    //while (count != pContext->mConfigPara.AutoTestCount)
     {
         alogd("======================================.\r\n");
         alogd("Auto Test count start: %d. (MaxCount==1000).\r\n", count);
         system("cat /proc/meminfo | grep Committed_AS");
-        alogd("======================================.\r\n");    
+        alogd("======================================.\r\n");
         MPP_SYS_CONF_S mSysConf;
         memset(&mSysConf, 0, sizeof(MPP_SYS_CONF_S));
         mSysConf.nAlignWidth = 32;
@@ -372,7 +276,8 @@ int venc_main(int argc, char *argv[])
             aloge("sys Init failed!");
             return -1;
         }
-        pContext->mViDev = pContext->mConfigPara.DevNum;
+
+        pContext->mViDev = 0; //pContext->mConfigPara.DevNum;
         /* dev:0, chn:0,1,2,3,4...16 */
         /* dev:1, chn:0,1,2,3,4...16 */
         /* dev:2, chn:0,1,2,3,4...16 */
@@ -381,66 +286,121 @@ int venc_main(int argc, char *argv[])
         memset(&pContext->mViAttr, 0, sizeof(VI_ATTR_S));
         pContext->mViAttr.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
         pContext->mViAttr.memtype = V4L2_MEMORY_MMAP;
-        pContext->mViAttr.format.pixelformat = map_PIXEL_FORMAT_E_to_V4L2_PIX_FMT(pContext->mConfigPara.DestPicFormat);
+        pContext->mViAttr.format.pixelformat = map_PIXEL_FORMAT_E_to_V4L2_PIX_FMT(MM_PIXEL_FORMAT_YVU_SEMIPLANAR_420);
         pContext->mViAttr.format.field = V4L2_FIELD_NONE;
-        pContext->mViAttr.format.width = pContext->mConfigPara.SrcWidth;
-        pContext->mViAttr.format.height = pContext->mConfigPara.SrcHeight;
-        pContext->mViAttr.fps = pContext->mConfigPara.SrcFrameRate;
+        pContext->mViAttr.format.width = 1920;  //pContext->mConfigPara.SrcWidth;
+        pContext->mViAttr.format.height = 1080; //pContext->mConfigPara.SrcHeight;
+        pContext->mViAttr.fps = 20;             //pContext->mConfigPara.SrcFrameRate;
         /* update configuration anyway, do not use current configuration */
         pContext->mViAttr.use_current_win = 0;
         pContext->mViAttr.nbufs = 5;
         pContext->mViAttr.nplanes = 2;
 
         /* MPP components */
-        pContext->mVeChn = 0;
+        pContext->mVeChn[0] = 0;
+        pContext->mVeChn[1] = 1;
 
         /* venc chn attr */
-        memset(&pContext->mVEncChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
+        memset(&pContext->mVEncChnAttr[0], 0, sizeof(VENC_CHN_ATTR_S));
+        memset(&pContext->mVEncChnAttr[1], 0, sizeof(VENC_CHN_ATTR_S));
+
         //SIZE_S wantedVideoSize = {pContext->mConfigPara.DestWidth, pContext->mConfigPara.DestHeight};
         //int wantedFrameRate = pContext->mConfigPara.DestFrameRate;
-        pContext->mVEncChnAttr.VeAttr.Type = pContext->mConfigPara.EncoderType;
-        pContext->mVEncChnAttr.VeAttr.MaxKeyInterval = pContext->mConfigPara.DestFrameRate;
-        pContext->mVEncChnAttr.VeAttr.SrcPicWidth = pContext->mConfigPara.SrcWidth;
-        pContext->mVEncChnAttr.VeAttr.SrcPicHeight = pContext->mConfigPara.SrcHeight;
-        pContext->mVEncChnAttr.VeAttr.Field = VIDEO_FIELD_FRAME;
-        pContext->mVEncChnAttr.VeAttr.PixelFormat = pContext->mConfigPara.DestPicFormat;
-        //int wantedVideoBitRate = pContext->mConfigPara.DestBitRate;
-        if(PT_H264 == pContext->mVEncChnAttr.VeAttr.Type)
+        pContext->mVEncChnAttr[0].VeAttr.Type = PT_H264;      //pContext->mConfigPara.EncoderType;
+        pContext->mVEncChnAttr[0].VeAttr.MaxKeyInterval = 20; //pContext->mConfigPara.DestFrameRate;
+        pContext->mVEncChnAttr[0].VeAttr.SrcPicWidth = 1920;  //pContext->mConfigPara.SrcWidth;
+        pContext->mVEncChnAttr[0].VeAttr.SrcPicHeight = 1080; //pContext->mConfigPara.SrcHeight;
+        pContext->mVEncChnAttr[0].VeAttr.Field = VIDEO_FIELD_FRAME;
+        pContext->mVEncChnAttr[0].VeAttr.PixelFormat = MM_PIXEL_FORMAT_YVU_SEMIPLANAR_420; //pContext->mConfigPara.DestPicFormat;
+                                                                                           //int wantedVideoBitRate = pContext->mConfigPara.DestBitRate;
+
+        pContext->mVEncChnAttr[1].VeAttr.Type = PT_H265;      //pContext->mConfigPara.EncoderType;
+        pContext->mVEncChnAttr[1].VeAttr.MaxKeyInterval = 20; //pContext->mConfigPara.DestFrameRate;
+        pContext->mVEncChnAttr[1].VeAttr.SrcPicWidth = 1920;  //pContext->mConfigPara.SrcWidth;
+        pContext->mVEncChnAttr[1].VeAttr.SrcPicHeight = 1080; //pContext->mConfigPara.SrcHeight;
+        pContext->mVEncChnAttr[1].VeAttr.Field = VIDEO_FIELD_FRAME;
+        pContext->mVEncChnAttr[1].VeAttr.PixelFormat = MM_PIXEL_FORMAT_YVU_SEMIPLANAR_420; //pContext->mConfigPara.DestPicFormat;
+                                                                                           //int wantedVideoBitRate = pContext->mConfigPara.DestBitRate;
+
+#define TARGET_IMG_W 1920
+#define TARGET_IMG_H 1080
+#define TARGET_RATE 8388608
+
+        if (PT_H264 == pContext->mVEncChnAttr[0].VeAttr.Type)
         {
-            pContext->mVEncChnAttr.VeAttr.AttrH264e.Profile = 1;
-            pContext->mVEncChnAttr.VeAttr.AttrH264e.bByFrame = TRUE;
-            pContext->mVEncChnAttr.VeAttr.AttrH264e.PicWidth = pContext->mConfigPara.DestWidth;
-            pContext->mVEncChnAttr.VeAttr.AttrH264e.PicHeight = pContext->mConfigPara.DestHeight;
-            pContext->mVEncChnAttr.VeAttr.AttrH264e.mLevel = H264_LEVEL_51;
-            pContext->mVEncChnAttr.VeAttr.AttrH264e.mbPIntraEnable = TRUE;
-            pContext->mVEncChnAttr.RcAttr.mRcMode = VENC_RC_MODE_H264CBR;
-            pContext->mVEncChnAttr.RcAttr.mAttrH264Cbr.mBitRate = pContext->mConfigPara.DestBitRate;
-            pContext->mVEncChnAttr.RcAttr.mAttrH264Cbr.mMaxQp = 51;
-            pContext->mVEncChnAttr.RcAttr.mAttrH264Cbr.mMinQp = 1;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH264e.Profile = 1;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH264e.bByFrame = TRUE;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH264e.PicWidth = TARGET_IMG_W;  //pContext->mConfigPara.DestWidth;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH264e.PicHeight = TARGET_IMG_H; //pContext->mConfigPara.DestHeight;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH264e.mLevel = H264_LEVEL_51;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH264e.mbPIntraEnable = TRUE;
+            pContext->mVEncChnAttr[0].RcAttr.mRcMode = VENC_RC_MODE_H264CBR;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrH264Cbr.mBitRate = TARGET_RATE; //pContext->mConfigPara.DestBitRate;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrH264Cbr.mMaxQp = 51;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrH264Cbr.mMinQp = 1;
         }
-        else if(PT_H265 == pContext->mVEncChnAttr.VeAttr.Type)
+        else if (PT_H265 == pContext->mVEncChnAttr[0].VeAttr.Type)
         {
-            pContext->mVEncChnAttr.VeAttr.AttrH265e.mProfile = 0;
-            pContext->mVEncChnAttr.VeAttr.AttrH265e.mbByFrame = TRUE;
-            pContext->mVEncChnAttr.VeAttr.AttrH265e.mPicWidth = pContext->mConfigPara.DestWidth;
-            pContext->mVEncChnAttr.VeAttr.AttrH265e.mPicHeight = pContext->mConfigPara.DestHeight;
-            pContext->mVEncChnAttr.VeAttr.AttrH265e.mLevel = H265_LEVEL_62;
-            pContext->mVEncChnAttr.VeAttr.AttrH265e.mbPIntraEnable = TRUE;
-            pContext->mVEncChnAttr.RcAttr.mRcMode = VENC_RC_MODE_H265CBR;
-            pContext->mVEncChnAttr.RcAttr.mAttrH265Cbr.mBitRate = pContext->mConfigPara.DestBitRate;
-            pContext->mVEncChnAttr.RcAttr.mAttrH265Cbr.mMaxQp = 51;
-            pContext->mVEncChnAttr.RcAttr.mAttrH265Cbr.mMinQp = 1;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH265e.mProfile = 0;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH265e.mbByFrame = TRUE;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH265e.mPicWidth = TARGET_IMG_W;  //pContext->mConfigPara.DestWidth;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH265e.mPicHeight = TARGET_IMG_H; // pContext->mConfigPara.DestHeight;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH265e.mLevel = H265_LEVEL_62;
+            pContext->mVEncChnAttr[0].VeAttr.AttrH265e.mbPIntraEnable = TRUE;
+            pContext->mVEncChnAttr[0].RcAttr.mRcMode = VENC_RC_MODE_H265CBR;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrH265Cbr.mBitRate = TARGET_RATE; //pContext->mConfigPara.DestBitRate;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrH265Cbr.mMaxQp = 51;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrH265Cbr.mMinQp = 1;
         }
-        else if(PT_MJPEG == pContext->mVEncChnAttr.VeAttr.Type)
+        else if (PT_MJPEG == pContext->mVEncChnAttr[0].VeAttr.Type)
         {
-            pContext->mVEncChnAttr.VeAttr.AttrMjpeg.mbByFrame = TRUE;
-            pContext->mVEncChnAttr.VeAttr.AttrMjpeg.mPicWidth= pContext->mConfigPara.DestWidth;
-            pContext->mVEncChnAttr.VeAttr.AttrMjpeg.mPicHeight = pContext->mConfigPara.DestHeight;
-            pContext->mVEncChnAttr.RcAttr.mRcMode = VENC_RC_MODE_MJPEGCBR;
-            pContext->mVEncChnAttr.RcAttr.mAttrMjpegeCbr.mBitRate = pContext->mConfigPara.DestBitRate;
+            pContext->mVEncChnAttr[0].VeAttr.AttrMjpeg.mbByFrame = TRUE;
+            pContext->mVEncChnAttr[0].VeAttr.AttrMjpeg.mPicWidth = TARGET_IMG_W;  //pContext->mConfigPara.DestWidth;
+            pContext->mVEncChnAttr[0].VeAttr.AttrMjpeg.mPicHeight = TARGET_IMG_H; //pContext->mConfigPara.DestHeight;
+            pContext->mVEncChnAttr[0].RcAttr.mRcMode = VENC_RC_MODE_MJPEGCBR;
+            pContext->mVEncChnAttr[0].RcAttr.mAttrMjpegeCbr.mBitRate = TARGET_RATE; //pContext->mConfigPara.DestBitRate;
         }
-        pContext->mVencFrameRateConfig.SrcFrmRate = pContext->mConfigPara.SrcFrameRate;
-        pContext->mVencFrameRateConfig.DstFrmRate = pContext->mConfigPara.DestFrameRate;
+
+#define TARGET_IMG_W2 640
+#define TARGET_IMG_H2 480
+#define TARGET_RATE2 83886
+        if (PT_H264 == pContext->mVEncChnAttr[1].VeAttr.Type)
+        {
+            pContext->mVEncChnAttr[1].VeAttr.AttrH264e.Profile = 1;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH264e.bByFrame = TRUE;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH264e.PicWidth = TARGET_IMG_W2;  //pContext->mConfigPara.DestWidth;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH264e.PicHeight = TARGET_IMG_H2; //pContext->mConfigPara.DestHeight;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH264e.mLevel = H264_LEVEL_51;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH264e.mbPIntraEnable = TRUE;
+            pContext->mVEncChnAttr[1].RcAttr.mRcMode = VENC_RC_MODE_H264CBR;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrH264Cbr.mBitRate = TARGET_RATE2; //pContext->mConfigPara.DestBitRate;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrH264Cbr.mMaxQp = 51;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrH264Cbr.mMinQp = 1;
+        }
+        else if (PT_H265 == pContext->mVEncChnAttr[1].VeAttr.Type)
+        {
+            pContext->mVEncChnAttr[1].VeAttr.AttrH265e.mProfile = 0;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH265e.mbByFrame = TRUE;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH265e.mPicWidth = TARGET_IMG_W2;  //pContext->mConfigPara.DestWidth;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH265e.mPicHeight = TARGET_IMG_H2; // pContext->mConfigPara.DestHeight;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH265e.mLevel = H265_LEVEL_62;
+            pContext->mVEncChnAttr[1].VeAttr.AttrH265e.mbPIntraEnable = TRUE;
+            pContext->mVEncChnAttr[1].RcAttr.mRcMode = VENC_RC_MODE_H265CBR;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrH265Cbr.mBitRate = TARGET_RATE2; //pContext->mConfigPara.DestBitRate;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrH265Cbr.mMaxQp = 51;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrH265Cbr.mMinQp = 1;
+        }
+        else if (PT_MJPEG == pContext->mVEncChnAttr[1].VeAttr.Type)
+        {
+            pContext->mVEncChnAttr[1].VeAttr.AttrMjpeg.mbByFrame = TRUE;
+            pContext->mVEncChnAttr[1].VeAttr.AttrMjpeg.mPicWidth = TARGET_IMG_W2;  //pContext->mConfigPara.DestWidth;
+            pContext->mVEncChnAttr[1].VeAttr.AttrMjpeg.mPicHeight = TARGET_IMG_H2; //pContext->mConfigPara.DestHeight;
+            pContext->mVEncChnAttr[1].RcAttr.mRcMode = VENC_RC_MODE_MJPEGCBR;
+            pContext->mVEncChnAttr[1].RcAttr.mAttrMjpegeCbr.mBitRate = TARGET_RATE2; //pContext->mConfigPara.DestBitRate;
+        }
+
+        pContext->mVencFrameRateConfig.SrcFrmRate = 20; //pContext->mConfigPara.SrcFrameRate;
+        pContext->mVencFrameRateConfig.DstFrmRate = 20; //pContext->mConfigPara.DestFrameRate;
 #if 0
         /* has invoked in QG_MPI_SYS_Init() */
         result = VENC_Construct();
@@ -455,65 +415,69 @@ int venc_main(int argc, char *argv[])
         //QG_MPI_ISP_Init();
         QG_MPI_ISP_Run(pContext->mIspDev);
         // for (virvi_chn = 0; virvi_chn < MAX_VIR_CHN_NUM; virvi_chn++)
-        for (virvi_chn = 0; virvi_chn < 1; virvi_chn++)
+        for (virvi_chn = 0; virvi_chn < 2; virvi_chn++)
         {
             memset(&pContext->privCap[pContext->mViDev][virvi_chn], 0, sizeof(VI2Venc_Cap_S));
             pContext->privCap[pContext->mViDev][virvi_chn].Dev = pContext->mViDev;
             pContext->privCap[pContext->mViDev][virvi_chn].Chn = virvi_chn;
-            pContext->privCap[pContext->mViDev][virvi_chn].s32MilliSec = 5000;  // 2000;
-            pContext->privCap[pContext->mViDev][virvi_chn].EncoderType = pContext->mVEncChnAttr.VeAttr.Type;
-            if (0 == virvi_chn) /* H264, H265, MJPG, Preview(LCD or HDMI), VDA, ISE, AIE, CVBS */
+            pContext->privCap[pContext->mViDev][virvi_chn].s32MilliSec = 5000; // 2000;
+            pContext->privCap[pContext->mViDev][virvi_chn].EncoderType = pContext->mVEncChnAttr[virvi_chn].VeAttr.Type;
+            //if (0 == virvi_chn) /* H264, H265, MJPG, Preview(LCD or HDMI), VDA, ISE, AIE, CVBS */
             {
                 /* open isp */
-                if (pContext->mViDev == 0 || pContext->mViDev == 1) 
+                if (pContext->mViDev == 0 || pContext->mViDev == 1)
                 {
                     pContext->mIspDev = 0;
-                } 
-                else if (pContext->mViDev == 2 || pContext->mViDev == 3) 
+                }
+                else if (pContext->mViDev == 2 || pContext->mViDev == 3)
                 {
                     pContext->mIspDev = 1;
                 }
 
                 result = hal_virvi_start(pContext->mViDev, virvi_chn, NULL);
-                if(result < 0)
+                if (result < 0)
                 {
                     alogd("VI start failed!\n");
                     result = -1;
                     goto _exit;
                 }
                 pContext->privCap[pContext->mViDev][virvi_chn].thid = 0;
-                result = QG_MPI_VENC_CreateChn(pContext->mVeChn, &pContext->mVEncChnAttr);
-                if(result < 0)
+                result = QG_MPI_VENC_CreateChn(pContext->mVeChn[virvi_chn], &pContext->mVEncChnAttr[virvi_chn]);
+                if (result < 0)
                 {
-                    alogd("create venc channel[%d] falied!\n", pContext->mVeChn);
+                    alogd("create venc channel[%d] falied!\n", pContext->mVeChn[virvi_chn]);
                     result = -1;
                     goto _exit;
                 }
-                pContext->privCap[pContext->mViDev][virvi_chn].mVencChn = pContext->mVeChn;
-                QG_MPI_VENC_SetFrameRate(pContext->mVeChn, &pContext->mVencFrameRateConfig);
+                pContext->privCap[pContext->mViDev][virvi_chn].mVencChn = pContext->mVeChn[virvi_chn];
+                QG_MPI_VENC_SetFrameRate(pContext->mVeChn[virvi_chn], &pContext->mVencFrameRateConfig);
                 VencHeaderData vencheader;
                 //open output file
+
+                /*
                 pContext->mOutputFileFp = fopen(pContext->mConfigPara.OutputFilePath, "wb+");
-                if(!pContext->mOutputFileFp)
+                if (!pContext->mOutputFileFp)
                 {
                     aloge("fatal error! can't open file[%s]", pContext->mConfigPara.OutputFilePath);
                     result = -1;
                     //goto _exit;
                 }
-                if(PT_H264 == pContext->mVEncChnAttr.VeAttr.Type)
+                */
+
+                if (PT_H264 == pContext->mVEncChnAttr[virvi_chn].VeAttr.Type)
                 {
-                    QG_MPI_VENC_GetH264SpsPpsInfo(pContext->mVeChn, &vencheader);
-                    if(vencheader.nLength)
+                    QG_MPI_VENC_GetH264SpsPpsInfo(pContext->mVeChn[virvi_chn], &vencheader);
+                    if (vencheader.nLength)
                     {
-                        fwrite(vencheader.pBuffer,vencheader.nLength,1,pContext->mOutputFileFp);
+                        //fwrite(vencheader.pBuffer, vencheader.nLength, 1, pContext->mOutputFileFp);
                     }
                 }
-                else if(PT_H265 == pContext->mVEncChnAttr.VeAttr.Type)
+                else if (PT_H265 == pContext->mVEncChnAttr[virvi_chn].VeAttr.Type)
                 {
-                    QG_MPI_VENC_GetH265SpsPpsInfo(pContext->mVeChn, &vencheader);
-                    if(vencheader.nLength)
+                    QG_MPI_VENC_GetH265SpsPpsInfo(pContext->mVeChn[virvi_chn], &vencheader);
+                    if (vencheader.nLength)
                     {
-                        fwrite(vencheader.pBuffer,vencheader.nLength, 1, pContext->mOutputFileFp);
+                        //fwrite(vencheader.pBuffer, vencheader.nLength, 1, pContext->mOutputFileFp);
                     }
                 }
                 result = pthread_create(&pContext->privCap[pContext->mViDev][virvi_chn].thid, NULL, GetEncoderFrameThread, (void *)&pContext->privCap[pContext->mViDev][virvi_chn]);
@@ -524,11 +488,12 @@ int venc_main(int argc, char *argv[])
                 }
             }
         }
+
         for (virvi_chn = 0; virvi_chn < 1; virvi_chn++)
         {
             int eError = 0;
             alogd("wait get encoder frame thread exit!");
-            pthread_join(pContext->privCap[pContext->mViDev][virvi_chn].thid, (void*)&eError);
+            pthread_join(pContext->privCap[pContext->mViDev][virvi_chn].thid, (void *)&eError);
             alogd("get encoder frame thread exit done!");
         }
 
@@ -544,10 +509,10 @@ int venc_main(int argc, char *argv[])
         for (virvi_chn = 0; virvi_chn < 1; virvi_chn++)
         {
             ret = QG_MPI_VI_DisableVirChn(pContext->mViDev, virvi_chn);
-            if(ret < 0)
+            if (ret < 0)
             {
                 aloge("Disable VI Chn failed,VIDev = %d,VIChn = %d", pContext->mViDev, virvi_chn);
-                return ret ;
+                return ret;
             }
         }
 #endif
@@ -568,7 +533,7 @@ int venc_main(int argc, char *argv[])
         for (virvi_chn = 0; virvi_chn < 1; virvi_chn++)
         {
             result = hal_virvi_end(pContext->mViDev, virvi_chn);
-            if(result < 0)
+            if (result < 0)
             {
                 alogd("VI end failed!\n");
                 result = -1;
@@ -594,7 +559,7 @@ int venc_main(int argc, char *argv[])
         alogd("======================================.\r\n");
         count++;
     }
-    if(pContext!=NULL)
+    if (pContext != NULL)
     {
         free(pContext);
         pContext = NULL;
@@ -603,7 +568,7 @@ int venc_main(int argc, char *argv[])
     printf("sample_virvi2venc exit!\n");
     return 0;
 _exit:
-    if(pContext!=NULL)
+    if (pContext != NULL)
     {
         free(pContext);
         pContext = NULL;
