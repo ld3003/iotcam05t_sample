@@ -13,10 +13,10 @@
 #include <pthread.h>
 #include "tsemaphore.h"
 
-
 #define MAX_FILE_PATH_SIZE (256)
 
-typedef struct WaveHeader{
+typedef struct WaveHeader
+{
     int riff_id;
     int riff_sz;
     int riff_fmt;
@@ -35,7 +35,7 @@ typedef struct WaveHeader{
 typedef struct SampleAi2AencCmdLineParam
 {
     char mConfigFilePath[MAX_FILE_PATH_SIZE];
-}SampleAi2AencCmdLineParam;
+} SampleAi2AencCmdLineParam;
 
 typedef struct SampleAi2AencConfig
 {
@@ -49,7 +49,7 @@ typedef struct SampleAi2AencConfig
     PAYLOAD_TYPE_E mCodecType;
 
     int mTestDuration;
-}SampleAi2AencConfig;
+} SampleAi2AencConfig;
 
 typedef struct SampleAi2AencContext
 {
@@ -58,7 +58,7 @@ typedef struct SampleAi2AencContext
 
     cdx_sem_t mSemExit;
 
-    FILE *mFpDstFile;   //compressed file
+    FILE *mFpDstFile; //compressed file
     int mDstFileSize;
 
     MPP_SYS_CONF_S mSysConf;
@@ -72,7 +72,20 @@ typedef struct SampleAi2AencContext
 
     BOOL mOverFlag;
     pthread_t mThdId;
-}SampleAi2AencContext;
+} SampleAi2AencContext;
 
-#endif  /* _SAMPLE_AENC_H_ */
+#ifdef __cplusplus //告诉编译器，这部分代码按C语言的格式进行编译，而不是C++的
 
+extern "C"
+{
+
+#endif
+
+    extern int aenc_main(int argc, char *argv[]);
+
+#ifdef __cplusplus
+}
+
+#endif
+
+#endif /* _SAMPLE_AENC_H_ */

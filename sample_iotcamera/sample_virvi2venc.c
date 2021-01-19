@@ -30,7 +30,7 @@
 #include "media/mpi_isp.h"
 #include "media/mpi_venc.h"
 #include "media/mpi_sys.h"
-#include "mm_common.h"
+#include "mm_common.h"x
 #include "mm_comm_venc.h"
 #include "mm_comm_rc.h"
 #include <mpi_videoformat_conversion.h>

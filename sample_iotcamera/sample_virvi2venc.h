@@ -4,8 +4,25 @@
 #include <plat_type.h>
 #include <tsemaphore.h>
 
-#define MAX_FILE_PATH_SIZE  (256)
-typedef struct awVI2Venc_PrivCap_S {
+
+#include "media/mm_comm_vi.h"
+#include "media/mpi_vi.h"
+#include "media/mpi_isp.h"
+#include "media/mpi_venc.h"
+#include "media/mpi_sys.h"
+#include "mm_common.h"
+#include "mm_comm_venc.h"
+#include "mm_comm_rc.h"
+#include <mpi_videoformat_conversion.h>
+
+#include <confparser.h>
+#include "sample_virvi2venc.h"
+#include "sample_virvi2venc_config.h"
+
+
+#define MAX_FILE_PATH_SIZE (256)
+typedef struct awVI2Venc_PrivCap_S
+{
     pthread_t thid;
     VI_DEV Dev;
     VI_CHN Chn;
@@ -17,7 +34,7 @@ typedef struct awVI2Venc_PrivCap_S {
 typedef struct SampleVirvi2VencCmdLineParam
 {
     char mConfigFilePath[MAX_FILE_PATH_SIZE];
-}SampleVirvi2VencCmdLineParam;
+} SampleVirvi2VencCmdLineParam;
 
 typedef struct SampleVirvi2VencConfig
 {
@@ -36,14 +53,14 @@ typedef struct SampleVirvi2VencConfig
     int DestBitRate;
     PIXEL_FORMAT_E DestPicFormat; //MM_PIXEL_FORMAT_YUV_PLANAR_420
     char OutputFilePath[MAX_FILE_PATH_SIZE];
-}SampleVirvi2VencConfig;
+} SampleVirvi2VencConfig;
 
 typedef struct SampleVirvi2VencConfparser
 {
     SampleVirvi2VencCmdLineParam mCmdLinePara;
     SampleVirvi2VencConfig mConfigPara;
-    FILE* mOutputFileFp;
-    
+    FILE *mOutputFileFp;
+
     VENC_CHN mVeChn;
 
     ISP_DEV mIspDev;
@@ -55,7 +72,22 @@ typedef struct SampleVirvi2VencConfparser
     VENC_FRAME_RATE_S mVencFrameRateConfig;
 
     VI2Venc_Cap_S privCap[MAX_VIPP_DEV_NUM][MAX_VIR_CHN_NUM];
-}SampleVirvi2VencConfparser;
+} SampleVirvi2VencConfparser;
 
-#endif  /* _SAMPLE_VIRVI2VENC_H_ */
+#ifdef __cplusplus //告诉编译器，这部分代码按C语言的格式进行编译，而不是C++的
 
+extern "C"
+{
+
+
+
+#endif
+
+    extern int venc_main(int argc, char *argv[]);
+
+#ifdef __cplusplus
+}
+
+#endif
+
+#endif /* _SAMPLE_VIRVI2VENC_H_ */
