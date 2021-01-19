@@ -44,6 +44,7 @@ SRCCS := \
     serialport.cpp \
     sample_virvi2venc.c \
     sample_ai2aenc.c \
+    queue.c \
     
 
 SRCS += $(wildcard ./JSON/*.c)
@@ -223,7 +224,7 @@ LOCAL_STATIC_LIBS += lib_ise_mo
 #set dst file name: shared library, static library, execute bin.
 LOCAL_TARGET_DYNAMIC :=
 LOCAL_TARGET_STATIC :=
-LOCAL_TARGET_BIN := sample_rtsp
+LOCAL_TARGET_BIN := sample_iotcamera
 
 #generate include directory flags for gcc.
 inc_paths := $(foreach inc,$(filter-out -I%,$(INCLUDE_DIRS)),$(addprefix -I, $(inc))) \

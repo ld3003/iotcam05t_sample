@@ -285,6 +285,35 @@ void Virvi2Venc_HELP()
     alogd("Run CSI0/CSI1+Venc command: ./sample_virvi2venc -path ./sample_virvi2venc.conf\r\n");
 }
 
+#if 0
+
+########### paramter (ref to tulip_tarzanx.conf)############
+[parameter]
+auto_test_count = 1
+encoder_count = 1800
+# src parameter
+# dev number:0~3, vipp_number
+# src_width * src_height:720p/1080p;
+# src_frame_rate: 25
+dev_num = 0
+src_width = 1920
+src_height = 1080
+src_frame_rate = 20
+# dest parameter
+# dest_encoder_type is H.264/H.265/MJPEG
+# dest_width * dest_height is VGA;
+# dest_frame_rate is 25
+# pic_format is nv21(to enc pixelfmt must be yuv420sp)
+dest_encoder_type = H.265
+dest_width = 1920
+dest_height = 1080
+dest_frame_rate = 20
+dest_bit_rate = 8388608  //4M(4194304) 8M(8388608)
+dest_pic_format = nv21
+output_file_path = "QG_VirviEncoder.H265"
+
+#endif
+
 int venc_main(int argc, char *argv[])
 {
     int ret, count = 0,result = 0;
