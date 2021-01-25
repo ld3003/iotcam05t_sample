@@ -24,43 +24,40 @@
 #include "sample_ai2aenc.h"
 #include <cdx_list.h>
 
+#define SAMPLE_AI2AENC_DST_FILE "dst_file"
+#define SAMPLE_AI2AENC_ENCODER_TYPE "encoder_type"
 
-#define SAMPLE_AI2AENC_DST_FILE   "dst_file"
-#define SAMPLE_AI2AENC_ENCODER_TYPE   "encoder_type"
-
-#define SAMPLE_AI2AENC_SAMPLE_RATE   "sample_rate"
-#define SAMPLE_AI2AENC_CHANNEL_CNT   "channel_cnt"
-#define SAMPLE_AI2AENC_BIT_WIDTH     "bit_width"
-#define SAMPLE_AI2AENC_FRAME_SIZE    "frame_size"
+#define SAMPLE_AI2AENC_SAMPLE_RATE "sample_rate"
+#define SAMPLE_AI2AENC_CHANNEL_CNT "channel_cnt"
+#define SAMPLE_AI2AENC_BIT_WIDTH "bit_width"
+#define SAMPLE_AI2AENC_FRAME_SIZE "frame_size"
 #define SAMPLE_AI2AENC_TEST_DURATION "test_duration"
-
-
 
 static int ParseCmdLine(int argc, char **argv, SampleAi2AencContext *pStContext)
 {
     alogd("sample aenc path:[%s], arg number is [%d]", argv[0], argc);
     int ret = 0;
-    int i=1;
+    int i = 1;
 
     memset(&pStContext->mCmdLinePara, 0, sizeof(SampleAi2AencCmdLineParam));
-    while(i < argc)
+    while (i < argc)
     {
-        if(!strcmp(argv[i], "-path"))
+        if (!strcmp(argv[i], "-path"))
         {
-            if(++i >= argc)
+            if (++i >= argc)
             {
                 aloge("fatal error! use -h to learn how to set parameter!!!");
                 ret = -1;
                 break;
             }
-            if(strlen(argv[i]) >= MAX_FILE_PATH_SIZE)
+            if (strlen(argv[i]) >= MAX_FILE_PATH_SIZE)
             {
                 aloge("fatal error! file path[%s] too long: [%d]>=[%d]!", argv[i], strlen(argv[i]), MAX_FILE_PATH_SIZE);
             }
-            strncpy(pStContext->mCmdLinePara.mConfigFilePath, argv[i], MAX_FILE_PATH_SIZE-1);
-            pStContext->mCmdLinePara.mConfigFilePath[MAX_FILE_PATH_SIZE-1] = '\0';
+            strncpy(pStContext->mCmdLinePara.mConfigFilePath, argv[i], MAX_FILE_PATH_SIZE - 1);
+            pStContext->mCmdLinePara.mConfigFilePath[MAX_FILE_PATH_SIZE - 1] = '\0';
         }
-        else if(!strcmp(argv[i], "-h"))
+        else if (!strcmp(argv[i], "-h"))
         {
             alogd("CmdLine param: -path /home/sample_ai2aenc.conf");
             ret = 1;
@@ -76,74 +73,45 @@ static int ParseCmdLine(int argc, char **argv, SampleAi2AencContext *pStContext)
     return ret;
 }
 
+#if 0
+########### paramter (ref to tulip_tarzanx.conf)############
+[parameter]
+dst_file = "/mnt/extsd/sample_ai2aenc."
+encoder_type = "aac"
+sample_rate = 8000
+channel_cnt = 1
+bit_width = 16
+frame_size = 1024
+test_duration = 30
+#endif
+
 static ERRORTYPE loadSampleAi2AencConfig(SampleAi2AencContext *pStContext, const char *conf_path)
 {
-    int ret;
-    char *ptr;
-    CONFPARSER_S stConfParser;
 
-    ret = createConfParser(conf_path, &stConfParser);
-    if(ret < 0)
-    {
-        aloge("load conf fail");
-        return FAILURE;
-    }
+#if 0
+########### paramter (ref to tulip_tarzanx.conf)############
+[parameter]
+dst_file = "/mnt/extsd/sample_ai2aenc."
+encoder_type = "aac"
+sample_rate = 8000
+channel_cnt = 1
+bit_width = 16
+frame_size = 1024
+test_duration = 30
+#endif
 
-    memset(&pStContext->mConfigPara, 0, sizeof(SampleAi2AencConfig));
+    pStContext->mConfigPara.mCodecType = PT_AAC;
+    pStContext->mConfigPara.mSampleRate = 8000;
+    pStContext->mConfigPara.mBitWidth = 16;
+    pStContext->mConfigPara.mChannelCnt = 1;
+    pStContext->mConfigPara.mFrameSize = 1024;
+    pStContext->mConfigPara.mTestDuration = 30;
 
-    ptr = (char*)GetConfParaString(&stConfParser, SAMPLE_AI2AENC_DST_FILE, NULL);
-    strncpy(pStContext->mConfigPara.mDstFilePath, ptr, MAX_FILE_PATH_SIZE);
+    strcat(pStContext->mConfigPara.mDstFilePath, "/mnt/extsd/sample_ai2aenc.");
 
-    ptr = (char*)GetConfParaString(&stConfParser, SAMPLE_AI2AENC_ENCODER_TYPE, NULL);
-    if (!strcmp(ptr, "aac"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_AAC;
-    }
-    else if (!strcmp(ptr, "mp3"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_MP3;
-    }
-    else if (!strcmp(ptr, "pcm"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_PCM_AUDIO;
-    }
-    else if (!strcmp(ptr, "adpcm"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_ADPCMA;
-    }
-    else if (!strcmp(ptr, "g726"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_G726;
-    }
-    else if (!strcmp(ptr, "g711a"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_G711A;
-    }
-    else if (!strcmp(ptr, "g711u"))
-    {
-        pStContext->mConfigPara.mCodecType = PT_G711U;
-    }
-    else
-    {
-        alogw("Unknown codec type[%s]! Set to default codec type[aac]!", ptr);
-        ptr = "aac";
-        pStContext->mConfigPara.mCodecType = PT_AAC;
-    }
-    strcat(pStContext->mConfigPara.mDstFilePath, ptr);
-
-    pStContext->mConfigPara.mSampleRate = GetConfParaInt(&stConfParser, SAMPLE_AI2AENC_SAMPLE_RATE, 0);
-    pStContext->mConfigPara.mBitWidth = GetConfParaInt(&stConfParser, SAMPLE_AI2AENC_BIT_WIDTH, 0);
-    pStContext->mConfigPara.mChannelCnt = GetConfParaInt(&stConfParser, SAMPLE_AI2AENC_CHANNEL_CNT, 0);
-    pStContext->mConfigPara.mFrameSize = GetConfParaInt(&stConfParser, SAMPLE_AI2AENC_FRAME_SIZE, 0);
-
-    pStContext->mConfigPara.mTestDuration = GetConfParaInt(&stConfParser, SAMPLE_AI2AENC_TEST_DURATION, 0);
-
-
-    alogd("parse info:samplerate=%d,bitwidth=%d,chn=%d,framesize=%d", pStContext->mConfigPara.mSampleRate, pStContext->mConfigPara.mBitWidth, \
-                    pStContext->mConfigPara.mChannelCnt, pStContext->mConfigPara.mFrameSize);
-    alogd("mDstFilePath [%s] with codec [%s]", pStContext->mConfigPara.mDstFilePath, ptr);
-
-    destroyConfParser(&stConfParser);
+    alogd("parse info:samplerate=%d,bitwidth=%d,chn=%d,framesize=%d", pStContext->mConfigPara.mSampleRate, pStContext->mConfigPara.mBitWidth,
+          pStContext->mConfigPara.mChannelCnt, pStContext->mConfigPara.mFrameSize);
+    alogd("mDstFilePath [%s] with codec [%s]", pStContext->mConfigPara.mDstFilePath, "/mnt/extsd/sample_ai2aenc.");
 
     return SUCCESS;
 }
@@ -153,7 +121,7 @@ static void configAiAttr(SampleAi2AencContext *pStContext)
     memset(&pStContext->mAiAttr, 0, sizeof(AIO_ATTR_S));
     pStContext->mAiAttr.u32ChnCnt = pStContext->mConfigPara.mChannelCnt;
     pStContext->mAiAttr.enSamplerate = (AUDIO_SAMPLE_RATE_E)pStContext->mConfigPara.mSampleRate;
-    pStContext->mAiAttr.enBitwidth = (AUDIO_BIT_WIDTH_E)(pStContext->mConfigPara.mBitWidth/8-1);
+    pStContext->mAiAttr.enBitwidth = (AUDIO_BIT_WIDTH_E)(pStContext->mConfigPara.mBitWidth / 8 - 1);
 }
 
 static void configAencAttr(SampleAi2AencContext *pStContext)
@@ -162,9 +130,9 @@ static void configAencAttr(SampleAi2AencContext *pStContext)
 
     pStContext->mAencAttr.sampleRate = pStContext->mConfigPara.mSampleRate;
     pStContext->mAencAttr.channels = pStContext->mConfigPara.mChannelCnt;
-    pStContext->mAencAttr.bitRate = 0;             // usful when codec G726
+    pStContext->mAencAttr.bitRate = 0; // usful when codec G726
     pStContext->mAencAttr.bitsPerSample = pStContext->mConfigPara.mBitWidth;
-    pStContext->mAencAttr.attachAACHeader = 1;     // ADTS
+    pStContext->mAencAttr.attachAACHeader = 1; // ADTS
     pStContext->mAencAttr.Type = pStContext->mConfigPara.mCodecType;
 }
 
@@ -201,14 +169,14 @@ static ERRORTYPE createAencChn(SampleAi2AencContext *pStContext)
     pStContext->mAencChn = 0;
     while (pStContext->mAencChn < AENC_MAX_CHN_NUM)
     {
-        ret = QG_MPI_AENC_CreateChn(pStContext->mAencChn, (AENC_CHN_ATTR_S*)&pStContext->mAencAttr);
+        ret = QG_MPI_AENC_CreateChn(pStContext->mAencChn, (AENC_CHN_ATTR_S *)&pStContext->mAencAttr);
         if (SUCCESS == ret)
         {
             nSuccessFlag = TRUE;
             alogd("create aenc channel[%d] success!", pStContext->mAencChn);
             break;
         }
-        else if(ERR_AENC_EXIST == ret)
+        else if (ERR_AENC_EXIST == ret)
         {
             alogd("aenc channel[%d] exist, find next!", pStContext->mAencChn);
             pStContext->mAencChn++;
@@ -220,7 +188,7 @@ static ERRORTYPE createAencChn(SampleAi2AencContext *pStContext)
         }
     }
 
-    if(FALSE == nSuccessFlag)
+    if (FALSE == nSuccessFlag)
     {
         pStContext->mAencChn = MM_INVALID_CHN;
         aloge("fatal error! create aenc channel fail!");
@@ -229,7 +197,7 @@ static ERRORTYPE createAencChn(SampleAi2AencContext *pStContext)
     else
     {
         MPPCallbackInfo cbInfo;
-        cbInfo.cookie = (void*)pStContext;
+        cbInfo.cookie = (void *)pStContext;
         cbInfo.callback = NULL;
         QG_MPI_AENC_RegisterCallback(pStContext->mAencChn, &cbInfo);
 
@@ -285,7 +253,7 @@ static ERRORTYPE createAiChn(SampleAi2AencContext *pStContext)
     else
     {
         MPPCallbackInfo cbInfo;
-        cbInfo.cookie = (void*)pStContext;
+        cbInfo.cookie = (void *)pStContext;
         cbInfo.callback = NULL;
         QG_MPI_AI_RegisterCallback(pStContext->mAiDev, pStContext->mAiChn, &cbInfo);
         return SUCCESS;
@@ -301,7 +269,7 @@ static void *getFrameThread(void *pThreadData)
 
     while (!pStContext->mOverFlag)
     {
-        if (SUCCESS == QG_MPI_AENC_GetStream(pStContext->mAencChn, &stream, 100/*0*/))
+        if (SUCCESS == QG_MPI_AENC_GetStream(pStContext->mAencChn, &stream, 100 /*0*/))
         {
             //alogd("get one stream with size: [%d]", stream.mLen);
             fwrite(stream.pStream, 1, stream.mLen, pStContext->mFpDstFile);
@@ -312,18 +280,12 @@ static void *getFrameThread(void *pThreadData)
     return NULL;
 }
 
-
 int aenc_main(int argc, char **argv)
 {
     int ret = 0;
     SampleAi2AencContext stContext;
 
     memset(&stContext, 0, sizeof(SampleAi2AencContext));
-
-    if (ParseCmdLine(argc, argv, &stContext) != 0)
-    {
-        return -1;
-    }
 
     if (loadSampleAi2AencConfig(&stContext, stContext.mCmdLinePara.mConfigFilePath) != SUCCESS)
     {
@@ -333,6 +295,8 @@ int aenc_main(int argc, char **argv)
 
     cdx_sem_init(&stContext.mSemExit, 0);
 
+    //不打开文件，防止文件坏掉
+#if 0
     stContext.mFpDstFile = fopen(stContext.mConfigPara.mDstFilePath, "wb");
     if (NULL == stContext.mFpDstFile)
     {
@@ -340,11 +304,12 @@ int aenc_main(int argc, char **argv)
         ret = -1;
         goto _exit_0;
     }
+#endif
 
-    //init mpp system
-    stContext.mSysConf.nAlignWidth = 32;
-    QG_MPI_SYS_SetConf(&stContext.mSysConf);
-    QG_MPI_SYS_Init();
+    //init mpp system 因为已经在video模块中初始化过了，所以不需要再次进行初始化了
+    //stContext.mSysConf.nAlignWidth = 32;
+    //QG_MPI_SYS_SetConf(&stContext.mSysConf);
+    //QG_MPI_SYS_Init();
 
     stContext.mAiDev = 0;
     stContext.mAiChn = MM_INVALID_CHN;
@@ -371,7 +336,7 @@ int aenc_main(int argc, char **argv)
 
     if (stContext.mConfigPara.mTestDuration > 0)
     {
-        cdx_sem_down_timedwait(&stContext.mSemExit, stContext.mConfigPara.mTestDuration*1000);
+        cdx_sem_down_timedwait(&stContext.mSemExit, stContext.mConfigPara.mTestDuration * 1000);
     }
     else
     {
@@ -379,7 +344,7 @@ int aenc_main(int argc, char **argv)
     }
     stContext.mOverFlag = TRUE;
 
-    usleep(100*1000);
+    usleep(100 * 1000);
 
     //stop
     QG_MPI_AI_DisableChn(stContext.mAiDev, stContext.mAiChn);
@@ -404,8 +369,9 @@ _exit_1:
     fclose(stContext.mFpDstFile);
 _exit_0:
     cdx_sem_deinit(&stContext.mSemExit);
-    if (ret == 0) {
-	    printf("sample_ai2aenc exit!\n");
+    if (ret == 0)
+    {
+        printf("sample_ai2aenc exit!\n");
     }
     return ret;
 }
