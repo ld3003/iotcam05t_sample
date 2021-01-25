@@ -306,7 +306,7 @@ int venc_main(int argc, char *argv[])
 
         //SIZE_S wantedVideoSize = {pContext->mConfigPara.DestWidth, pContext->mConfigPara.DestHeight};
         //int wantedFrameRate = pContext->mConfigPara.DestFrameRate;
-        pContext->mVEncChnAttr[0].VeAttr.Type = PT_H264;      //pContext->mConfigPara.EncoderType;
+        pContext->mVEncChnAttr[0].VeAttr.Type = PT_H265;      //pContext->mConfigPara.EncoderType;
         pContext->mVEncChnAttr[0].VeAttr.MaxKeyInterval = 20; //pContext->mConfigPara.DestFrameRate;
         pContext->mVEncChnAttr[0].VeAttr.SrcPicWidth = 1920;  //pContext->mConfigPara.SrcWidth;
         pContext->mVEncChnAttr[0].VeAttr.SrcPicHeight = 1080; //pContext->mConfigPara.SrcHeight;
