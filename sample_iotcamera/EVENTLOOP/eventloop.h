@@ -9,17 +9,19 @@
 
 #define NUM 8
 
-typedef long DATAPOINTER ;
+// #define DEBUGOPEN
 
-class QDataBase
+typedef long DATAPOINTER;
+
+class Event
 {
 public:
-    QDataBase(){};
-    ~QDataBase(){};
+    Event(){};
+    ~Event(){};
     virtual int process() = 0;
 };
 
-class BlockQueue
+class EventLoop
 {
 private:
     std::queue<DATAPOINTER> q;
@@ -63,7 +65,7 @@ private:
     }
 
 public:
-    BlockQueue(int _cap = NUM) : cap(_cap) //构造函数
+    EventLoop(int _cap = NUM) : cap(_cap) //构造函数
     {
         pthread_mutex_init(&mutex, NULL);
         pthread_cond_init(&full, NULL);
@@ -75,6 +77,9 @@ public:
         while (IsFull()) //队列满
         {
             NotifyConsume();
+#ifdef DEBUGOPEN
+
+#endif
             std::cout << "queue full,notify consume data,product stop!!" << std::endl;
             ProductWait();
         }
@@ -89,7 +94,9 @@ public:
         while (IsEmpty()) //队列为空
         {
             NotifyProduct();
+#ifdef DEBUGOPEN
             std::cout << "queue empty,notify product data,consume stop!!" << std::endl;
+#endif
             ConsumeWait();
         }
         //队列不为空
@@ -98,15 +105,17 @@ public:
         NotifyProduct();
         UnlockQueue();
     }
-    ~BlockQueue()
+    ~EventLoop()
     {
         pthread_mutex_destroy(&mutex);
         pthread_cond_destroy(&full);
         pthread_cond_destroy(&empty);
     }
+
+    pthread_t tid;
 };
 
-int create_consumer();
-int producter_push(QDataBase *data);
+int event_push(EventLoop *evl, Event *ev);
+EventLoop *create_eventloop();
 
 #endif

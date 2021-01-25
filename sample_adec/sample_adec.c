@@ -407,12 +407,12 @@ int parseAudioFile(SampleADecConfig *pConf, FILE *fp)
 {
     int ret = 0;
     unsigned char buf[4];
-	if(pConf->mType == PT_G711U || pConf->mType == PT_G711A)
-    {
-		pConf->mHeaderLen = 512;
-       fseek(fp, 0, SEEK_SET);
-	}
-	else
+	//if(pConf->mType == PT_G711U || pConf->mType == PT_G711A)
+    //{
+	//	pConf->mHeaderLen = 512;
+    //  fseek(fp, 0, SEEK_SET);
+	//}
+	//else
 	{
 		fseek(fp, 0, SEEK_SET);
 		fread(buf, 1, 4, fp);
@@ -614,7 +614,7 @@ int main(int argc, char *argv[])
     MPPCallbackInfo voCallback = {&stContext, SampleADecCallbackWrapper};
     QG_MPI_AO_RegisterCallback(stContext.mAIODev, stContext.mAOChn, &voCallback); 
     
-	QG_MPI_AO_SetDevVolume(stContext.mAIODev,100);
+	QG_MPI_AO_SetDevVolume(stContext.mAIODev,50);
     //config adec chn attr.
     stContext.mADecAttr.mType         = stContext.mConfigPara.mType;
 

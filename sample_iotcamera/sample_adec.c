@@ -329,25 +329,27 @@ static ERRORTYPE loadSampleADecConfig(SampleADecConfig *pConfig, const char *con
     char *ptr;
     CONFPARSER_S stConfParser;
 
-    ret = createConfParser(conf_path, &stConfParser);
-    if (ret < 0)
-    {
-        aloge("load conf fail!");
-        return FAILURE;
-    }
+    //ret = createConfParser(conf_path, &stConfParser);
+    //if (ret < 0)
+    //{
+    //    aloge("load conf fail!");
+    //    return FAILURE;
+    //}
+
     memset(pConfig, 0, sizeof(SampleADecConfig));
-    ptr = (char *)GetConfParaString(&stConfParser, SAMPLE_ADEC_AAC_FILE_PATH, NULL);
-    strncpy(pConfig->mCompressAudioFilePath, ptr, MAX_FILE_PATH_SIZE - 1);
+    //ptr = (char *)GetConfParaString(&stConfParser, SAMPLE_ADEC_AAC_FILE_PATH, NULL);
+    strncpy(pConfig->mCompressAudioFilePath, "/SDCARD/aac.aac", MAX_FILE_PATH_SIZE - 1);
     pConfig->mCompressAudioFilePath[MAX_FILE_PATH_SIZE - 1] = '\0';
     ptr = (char *)GetConfParaString(&stConfParser, SAMPLE_ADEC_PCM_FILE_PATH, NULL);
-    strncpy(pConfig->mDecompressAudioFilePath, ptr, MAX_FILE_PATH_SIZE - 1);
+    strncpy(pConfig->mDecompressAudioFilePath, "/SDCARD/aac.pcm", MAX_FILE_PATH_SIZE - 1);
     pConfig->mDecompressAudioFilePath[MAX_FILE_PATH_SIZE - 1] = '\0';
-    pConfig->mType = GetConfParaInt(&stConfParser, SAMPLE_ADEC_DATA_TYPE, 0);
+
+    pConfig->mType = PT_AAC; //GetConfParaInt(&stConfParser, SAMPLE_ADEC_DATA_TYPE, 0);
     //pConfig->mSampleRate = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_SAMPLE_RATE, 0);
     //pConfig->mBitWidth = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_BIT_WIDTH, 0);
     //pConfig->mChannelCnt = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_CHANNEL_CNT, 0);
     //pConfig->mStreamSize = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_Stream_SIZE, 0);
-    destroyConfParser(&stConfParser);
+    //destroyConfParser(&stConfParser);
 
     return SUCCESS;
 }
@@ -487,7 +489,7 @@ void writeWaveHeader(SampleADecConfig *pConf, FILE *fp, int pcm_size)
     memcpy(&header.data_id, "data", 4);
     header.data_sz = pcm_size;
     fseek(fp, 0, SEEK_SET);
-    fwrite(&header, 1, sizeof(WaveHeader), fp);
+    //fwrite(&header, 1, sizeof(WaveHeader), fp);
 }
 
 int adecmain(int argc, char *argv[])
@@ -507,14 +509,14 @@ int adecmain(int argc, char *argv[])
     //}
 
     char *pConfigFilePath;
-    if (strlen(stContext.mCmdLinePara.mConfigFilePath) > 0)
-    {
-        pConfigFilePath = stContext.mCmdLinePara.mConfigFilePath;
-    }
-    else
-    {
-        pConfigFilePath = DEFAULT_SAMPLE_ADEC_CONF_PATH;
-    }
+    //if (strlen(stContext.mCmdLinePara.mConfigFilePath) > 0)
+    //{
+    //   pConfigFilePath = stContext.mCmdLinePara.mConfigFilePath;
+    // }
+    // else
+    //{
+    //   pConfigFilePath = DEFAULT_SAMPLE_ADEC_CONF_PATH;
+    //}
 
     // parse config file.
     if (loadSampleADecConfig(&stContext.mConfigPara, pConfigFilePath) != SUCCESS)
@@ -550,9 +552,9 @@ int adecmain(int argc, char *argv[])
     //    fwrite(&tmpHeader, 1, sizeof(WaveHeader), stContext.mFpPcmFile);
 
     // init mpp system
-    stContext.mSysConf.nAlignWidth = 32;
-    QG_MPI_SYS_SetConf(&stContext.mSysConf);
-    QG_MPI_SYS_Init();
+    //stContext.mSysConf.nAlignWidth = 32;
+    //QG_MPI_SYS_SetConf(&stContext.mSysConf);
+    //QG_MPI_SYS_Init();
 
     // init Stream manager
     initSampleADecStreamManager(&stContext.mStreamManager, 5);
@@ -730,7 +732,7 @@ int adecmain(int argc, char *argv[])
         // get stream from file
         nStreamSize = extractStreamPacket(&nStreamInfo, stContext.mFpAudioFile, &stContext.mConfigPara);
         if (0 == nStreamSize)
-        {   // if no available audio data, clean output buffer and set eof flag
+        { // if no available audio data, clean output buffer and set eof flag
             //            while (QG_MPI_ADEC_GetFrame(stContext.mADecChn, &nFrameInfo, 100) != ERR_ADEC_BUF_EMPTY)
             //            {
             //                fwrite(nFrameInfo.mpAddr, 1, nFrameInfo.mLen, stContext.mFpPcmFile);
@@ -842,4 +844,15 @@ _exit:
         printf("sample_adec exit!\n");
     }
     return result;
+}
+
+static void startAdecThr(void *h)
+{
+    adecmain(0, 0);
+}
+static pthread_t startAdecThrId;
+int start_adec()
+{
+    pthread_create(&startAdecThrId, NULL, startAdecThr, 0);
+    return 0;
 }

@@ -277,6 +277,7 @@ int venc_main(int argc, char *argv[])
             return -1;
         }
 
+        start_adec();
         start_aenc();
 
         pContext->mViDev = 0; //pContext->mConfigPara.DevNum;
