@@ -265,14 +265,15 @@ static void *getFrameThread(void *pThreadData)
     AUDIO_STREAM_S stream;
     SampleAi2AencContext *pStContext = (SampleAi2AencContext *)pThreadData;
 
-    fseek(pStContext->mFpDstFile, 0, SEEK_SET);
+    //fseek(pStContext->mFpDstFile, 0, SEEK_SET);
 
-    while (!pStContext->mOverFlag)
+    for (;;)
+    //while (!pStContext->mOverFlag)
     {
         if (SUCCESS == QG_MPI_AENC_GetStream(pStContext->mAencChn, &stream, 100 /*0*/))
         {
-            //alogd("get one stream with size: [%d]", stream.mLen);
-            fwrite(stream.pStream, 1, stream.mLen, pStContext->mFpDstFile);
+            printf("get one stream with size: [%d]\n", stream.mLen);
+            //fwrite(stream.pStream, 1, stream.mLen, pStContext->mFpDstFile);
             QG_MPI_AENC_ReleaseStream(pStContext->mAencChn, &stream);
         }
     }
@@ -282,6 +283,7 @@ static void *getFrameThread(void *pThreadData)
 
 int aenc_main(int argc, char **argv)
 {
+#if 1
     int ret = 0;
     SampleAi2AencContext stContext;
 
@@ -321,6 +323,7 @@ int aenc_main(int argc, char **argv)
         ret = -1;
         goto _exit_1;
     }
+
     ret = createAencChn(&stContext);
     if (ret < 0)
     {
@@ -333,6 +336,10 @@ int aenc_main(int argc, char **argv)
     //start transe
     QG_MPI_AI_EnableChn(stContext.mAiDev, stContext.mAiChn);
     QG_MPI_AENC_StartRecvPcm(stContext.mAencChn);
+
+    for (;;)
+    {
+    };
 
     if (stContext.mConfigPara.mTestDuration > 0)
     {
@@ -374,4 +381,19 @@ _exit_0:
         printf("sample_ai2aenc exit!\n");
     }
     return ret;
+
+#else
+    return 0;
+#endif
+}
+
+static void startAencThr(void *h)
+{
+    aenc_main(0, 0);
+}
+static pthread_t aencThreadId;
+int start_aenc()
+{
+    pthread_create(&aencThreadId, NULL, startAencThr, 0);
+    return 0;
 }

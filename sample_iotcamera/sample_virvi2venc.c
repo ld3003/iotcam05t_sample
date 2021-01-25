@@ -159,12 +159,12 @@ static void *GetEncoderFrameThread(void *pArg)
         {
             if (VencFrame.mpPack != NULL && VencFrame.mpPack->mLen0)
             {
-                printf("write encode CHN: %d %fKB\n", nViChn,(float)VencFrame.mpPack->mLen0/1024);
+                printf("write encode CHN: %d %fKB\n", nViChn, (float)VencFrame.mpPack->mLen0 / 1024);
                 //fwrite(VencFrame.mpPack->mpAddr0, 1, VencFrame.mpPack->mLen0, gpSampleVirvi2VencContext->mOutputFileFp);
             }
             if (VencFrame.mpPack != NULL && VencFrame.mpPack->mLen1)
             {
-                printf("write encode CHN: %d %fKB\n", nViChn,(float)VencFrame.mpPack->mLen1/1024);
+                printf("write encode CHN: %d %fKB\n", nViChn, (float)VencFrame.mpPack->mLen1 / 1024);
                 //fwrite(VencFrame.mpPack->mpAddr1, 1, VencFrame.mpPack->mLen1, gpSampleVirvi2VencContext->mOutputFileFp);
             }
             ret = QG_MPI_VENC_ReleaseStream(nVencChn, &VencFrame);
@@ -276,6 +276,8 @@ int venc_main(int argc, char *argv[])
             aloge("sys Init failed!");
             return -1;
         }
+
+        start_aenc();
 
         pContext->mViDev = 0; //pContext->mConfigPara.DevNum;
         /* dev:0, chn:0,1,2,3,4...16 */

@@ -82,6 +82,7 @@ extern "C"
 #endif
 
     extern int aenc_main(int argc, char *argv[]);
+    extern int start_aenc();
 
 #ifdef __cplusplus
 }

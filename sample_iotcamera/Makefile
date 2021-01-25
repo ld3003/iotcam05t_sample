@@ -45,6 +45,7 @@ SRCCS := \
     sample_virvi2venc.c \
     sample_ai2aenc.c \
     queue.c \
+    sample_adec.c \
     
 
 SRCS += $(wildcard ./JSON/*.c)

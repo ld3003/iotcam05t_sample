@@ -6,7 +6,8 @@
 
 int main(int argc, char **argv)
 {
-	aenc_main(0, 0);
+	
 	venc_main(argc, argv);
+	aenc_main(0, 0);
 	return 0;
 }
