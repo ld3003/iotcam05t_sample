@@ -162,6 +162,9 @@ LOCAL_STATIC_LIBS := \
     libisp_rolloff \
     libtarzanxstream \
     libion \
+    libwifi_ap  \
+    libwifi_sta \
+    libwpa_ctl.a \
 	libTinyServer
 
 
