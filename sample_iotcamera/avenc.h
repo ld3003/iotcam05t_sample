@@ -6,8 +6,6 @@ extern "C"
 { //因为cpp文件默认定义了该宏),则采用C语言方式进行编译
 #endif
 
-#include "hi_include/hi_type.h"
-
     struct MEDIA_WRITE
     {
         int (*write_a)(unsigned char *buf, int len, int pts);
@@ -23,8 +21,8 @@ extern "C"
     int av_init();
 
     /* 第三个编码通道的操作函数，可以将要编码的数据发送至该通道进行编码*/
-    HI_S32 SEND_TO_CHN2(unsigned char *data, int len);
-    HI_S32 INIT_ENCODE_CHM__NUM2();
+    //HI_S32 SEND_TO_CHN2(unsigned char *data, int len);
+    //HI_S32 INIT_ENCODE_CHM__NUM2();
 
     void pause_write(unsigned char flag); //暂停编码器向应用层写数据 ，但是编码器仍然继续编码 ，用于应用层无锁切换
 

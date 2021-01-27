@@ -49,6 +49,7 @@ SRCCS := \
     media_queue.cpp \
     udpkcp.cpp \
     MQTTProcess.cpp \
+    avenc.cpp
     
 SRCCS += $(wildcard ./JSON/*.c)
 SRCCS += $(wildcard ./KCP/*.c)
