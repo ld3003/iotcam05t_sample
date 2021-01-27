@@ -6,16 +6,16 @@
 //消费者
 void *consumer(void *arg)
 {
-    EventLoop *bqp = (EventLoop *)arg;
+    EventLoop *evl = (EventLoop *)arg;
     DATAPOINTER data;
     for (;;)
     {
-        bqp->PopData(data);
+        evl->PopData(data);
         #ifdef DEBUGOPEN
         std::cout << "Event data done: " << data << std::endl;
         #endif
         Event *ev = (Event *)data;
-        ev->process();
+        ev->process(evl,ev);
         delete (ev);
     }
 }

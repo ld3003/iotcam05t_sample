@@ -12,13 +12,14 @@
 // #define DEBUGOPEN
 
 typedef long DATAPOINTER;
+class EventLoop;
 
 class Event
 {
 public:
     Event(){};
     ~Event(){};
-    virtual int process() = 0;
+    virtual int process(EventLoop *evl, Event *ev) = 0;
 };
 
 class EventLoop

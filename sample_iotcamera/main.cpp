@@ -10,7 +10,7 @@ class TestEvent : public Event
 public:
 	TestEvent(){};
 	~TestEvent(){};
-	virtual int process()
+	virtual int process(EventLoop *evl, Event *ev)
 	{
 		printf("%s %s\n", "TEST", "EVENT");
 	}
@@ -19,10 +19,9 @@ public:
 int main(int argc, char **argv)
 {
 	EventLoop *mainEvl = create_eventloop();
-	venc_main(argc, argv);
+	//venc_main(argc, argv);
 	//aenc_main(0, 0);
-
-	wifi_sta_init();
+	//wifi_sta_init();
 
 	for (;;)
 	{
