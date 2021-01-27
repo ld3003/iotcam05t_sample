@@ -48,18 +48,17 @@ SRCCS := \
     sample_adec.c \
     media_queue.cpp \
     udpkcp.cpp \
+    MQTTProcess.cpp \
     
 SRCCS += $(wildcard ./MQTTPacket/*.c)
-SRCS += $(wildcard ./JSON/*.c)
-SRCS += $(wildcard ./mqtt/*.c)
+SRCCS += $(wildcard ./JSON/*.c)
 SRCCS += $(wildcard ./KCP/*.c)
-SRCS += $(wildcard ./adp/*.c)
-
 SRCCS += $(wildcard ./ts/*.cpp)
-#SRCCS += $(wildcard ./rtp/*.cpp)
 SRCCS += $(wildcard ./EVENTLOOP/*.cpp)
 SRCCS += $(wildcard ./rtmp/*.cpp)
 SRCCS += $(wildcard ./rtsp/*.cpp)
+SRCCS += $(wildcard ./mqtt/*.c)
+
 
 #include directories
 INCLUDE_DIRS := \
