@@ -50,7 +50,6 @@ SRCCS := \
     udpkcp.cpp \
     MQTTProcess.cpp \
     
-SRCCS += $(wildcard ./MQTTPacket/*.c)
 SRCCS += $(wildcard ./JSON/*.c)
 SRCCS += $(wildcard ./KCP/*.c)
 SRCCS += $(wildcard ./ts/*.cpp)
@@ -164,8 +163,9 @@ LOCAL_STATIC_LIBS := \
     libion \
     libwifi_ap  \
     libwifi_sta \
-    libwpa_ctl.a \
-	libTinyServer
+    libwpa_ctl \
+	libTinyServer \
+    ./libpaho-mqtt3c \
 
 
 LOCAL_STATIC_LIBS += \
@@ -247,6 +247,7 @@ LOCAL_LDFLAGS := $(LDFLAGS)
 
 
 LIB_SEARCH_PATHS := \
+    ./ \
     $(EYESEE_MPP_LIBDIR) \
     $(PACKAGE_TOP)/sample/configfileparser \
     $(PACKAGE_TOP)/media/utils \
