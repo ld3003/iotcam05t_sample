@@ -5,6 +5,7 @@
 #include "wifi/wifi_ap.h"
 #include "wifi/wifi_sta.h"
 #include "event.h"
+#include "MPPPLAT/mppplat.h"
 
 static struct timeval CLOCK_TV;
 

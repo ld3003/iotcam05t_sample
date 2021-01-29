@@ -1,5 +1,5 @@
-#ifndef __pcm_h__
-#define __pcm_h__
+#ifndef __mq_h__
+#define __mq_h__
 
 #include <iostream>
 #include <queue>
