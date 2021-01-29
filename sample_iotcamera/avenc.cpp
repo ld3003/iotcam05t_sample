@@ -65,7 +65,6 @@ int write_video(int chn, unsigned char *buf, int len)
 	if (pausewrite_flag == 1)
 		return len;
 
-
 	if (_prev_video_pts[chn] == 0)
 		_prev_video_pts[chn] = getNowMicro();
 	int pts = (getNowMicro() - _prev_video_pts[chn]) / 1000;
@@ -114,4 +113,13 @@ int unregister_mw(struct MEDIA_WRITE *mw)
 	}
 
 	return -1;
+}
+
+AVSERVICE::AVSERVICE()
+{
+}
+
+int AVSERVICE::run()
+{
+	return 0;
 }

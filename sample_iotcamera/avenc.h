@@ -1,6 +1,8 @@
 #ifndef Avenc_h__
 #define Avenc_h__
 
+#include "EVENTLOOP/eventloop.h"
+
 #ifdef __cplusplus
 extern "C"
 { //因为cpp文件默认定义了该宏),则采用C语言方式进行编译
@@ -33,6 +35,17 @@ extern "C"
 
     int register_mw(struct MEDIA_WRITE *mw);
     int unregister_mw(struct MEDIA_WRITE *mw);
+
+    class AVSERVICE : public CThread
+    {
+    public:
+        AVSERVICE();
+        virtual ~AVSERVICE(){};
+        int run();
+
+    private:
+        int AVSERVICE;
+    };
 
 #ifdef __cplusplus
 }
