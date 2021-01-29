@@ -39,13 +39,11 @@ SRCCS := \
     ethmgr.cpp      \
     ctrlgpio.cpp    \
     rtsp_server.cpp \
-    wsclient.cpp \
-    wskt.cpp \
     serialport.cpp \
     queue.c \
-    media_queue.cpp \
     udpkcp.cpp \
     MQTTProcess.cpp \
+    CRtmpPush.cpp \
     avenc.cpp \
     http-server.c
     
@@ -56,6 +54,7 @@ SRCCS += $(wildcard ./EVENTLOOP/*.cpp)
 SRCCS += $(wildcard ./MEDIAQUEUE/*.cpp)
 SRCCS += $(wildcard ./srsrtmp/*.cpp)
 SRCCS += $(wildcard ./rtsp/*.cpp)
+SRCCS += $(wildcard ./WEBSOCKET/*.cpp)
 SRCCS += $(wildcard ./mqtt/*.c)
 SRCCS += $(wildcard ./MPPPLAT/*.c)
 
