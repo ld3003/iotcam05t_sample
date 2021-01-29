@@ -42,10 +42,7 @@ SRCCS := \
     wsclient.cpp \
     wskt.cpp \
     serialport.cpp \
-    sample_virvi2venc.c \
-    sample_ai2aenc.c \
     queue.c \
-    sample_adec.c \
     media_queue.cpp \
     udpkcp.cpp \
     MQTTProcess.cpp \
@@ -57,9 +54,11 @@ SRCCS += $(wildcard ./KCP/*.c)
 SRCCS += $(wildcard ./ts/*.cpp)
 SRCCS += $(wildcard ./EVENTLOOP/*.cpp)
 SRCCS += $(wildcard ./MEDIAQUEUE/*.cpp)
-SRCCS += $(wildcard ./rtmp/*.cpp)
+SRCCS += $(wildcard ./srsrtmp/*.cpp)
 SRCCS += $(wildcard ./rtsp/*.cpp)
 SRCCS += $(wildcard ./mqtt/*.c)
+SRCCS += $(wildcard ./MPPPLAT/*.c)
+
 
 
 #include directories

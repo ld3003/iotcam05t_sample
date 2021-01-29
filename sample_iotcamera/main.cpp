@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "sample_ai2aenc.h"
-#include "sample_virvi2venc.h"
+#include "MPPPLAT/sample_ai2aenc.h"
+#include "MPPPLAT/sample_virvi2venc.h"
 #include "EVENTLOOP/eventloop.h"
 #include "wifi/wifi_ap.h"
 #include "wifi/wifi_sta.h"

@@ -3,9 +3,9 @@
 #include "ts/Ts.h"
 #include "ts/Mux.h"
 #include "rtp/rtp.h"
-#include "rtmp/srs_kernel_ts.hpp"
-#include "rtmp/srs_librtmp.hpp"
-#include "rtmp/srs_lib_ts_demuxer.hpp"
+#include "srsrtmp/srs_kernel_ts.hpp"
+#include "srsrtmp/srs_librtmp.hpp"
+#include "srsrtmp/srs_lib_ts_demuxer.hpp"
 
 #define VIDEOBUF_LEN 188
 #define TIMEOUT 5000
