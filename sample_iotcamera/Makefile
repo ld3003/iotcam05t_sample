@@ -44,7 +44,6 @@ SRCCS := \
     udpkcp.cpp \
     MQTTProcess.cpp \
     CRtmpPush.cpp \
-    avenc.cpp \
     http-server.c
     
 SRCCS += $(wildcard ./JSON/*.c)
