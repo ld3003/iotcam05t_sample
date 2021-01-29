@@ -117,6 +117,6 @@ public:
 };
 
 int event_push(EventLoop *evl, Event *ev);
-EventLoop *create_eventloop();
+EventLoop *create_eventloop_thread();
 
 #endif

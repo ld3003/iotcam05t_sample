@@ -36,17 +36,7 @@ extern "C"
     int register_mw(struct MEDIA_WRITE *mw);
     int unregister_mw(struct MEDIA_WRITE *mw);
 
-    class AVSERVICE : public CThread
-    {
-    public:
-        AVSERVICE();
-        virtual ~AVSERVICE(){};
-        int run();
-
-    private:
-        int AVSERVICE;
-    };
-
+    
 #ifdef __cplusplus
 }
 #endif

@@ -37,7 +37,7 @@ void *producter(void *arg)
 }
 
 
-EventLoop *create_eventloop()
+EventLoop *create_eventloop_thread()
 {
     EventLoop *evl = new EventLoop();
     if (evl)

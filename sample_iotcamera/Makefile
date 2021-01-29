@@ -49,7 +49,8 @@ SRCCS := \
     media_queue.cpp \
     udpkcp.cpp \
     MQTTProcess.cpp \
-    avenc.cpp
+    avenc.cpp \
+    http-server.c
     
 SRCCS += $(wildcard ./JSON/*.c)
 SRCCS += $(wildcard ./KCP/*.c)
@@ -63,6 +64,7 @@ SRCCS += $(wildcard ./mqtt/*.c)
 #include directories
 INCLUDE_DIRS := \
     $(CUR_PATH) \
+    ../libevent/include \
     $(EYESEE_MPP_INCLUDE)/system/public/include \
     $(EYESEE_MPP_INCLUDE)/system/public/include/utils \
     $(EYESEE_MPP_INCLUDE)/system/public/include/kernel-headers \
@@ -166,7 +168,11 @@ LOCAL_STATIC_LIBS := \
     libwifi_sta \
     libwpa_ctl \
 	libTinyServer \
-    ./libpaho-mqtt3c \
+    libpaho-mqtt3c \
+    libevent \
+    libevent_pthreads \
+    libevent_core \
+    libevent_extra \
 
 
 LOCAL_STATIC_LIBS += \
@@ -249,6 +255,7 @@ LOCAL_LDFLAGS := $(LDFLAGS)
 
 LIB_SEARCH_PATHS := \
     ./ \
+    ../libevent/build/lib/ \
     $(EYESEE_MPP_LIBDIR) \
     $(PACKAGE_TOP)/sample/configfileparser \
     $(PACKAGE_TOP)/media/utils \

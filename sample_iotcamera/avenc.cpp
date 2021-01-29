@@ -115,11 +115,3 @@ int unregister_mw(struct MEDIA_WRITE *mw)
 	return -1;
 }
 
-AVSERVICE::AVSERVICE()
-{
-}
-
-int AVSERVICE::run()
-{
-	return 0;
-}
