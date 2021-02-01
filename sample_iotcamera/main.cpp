@@ -186,6 +186,9 @@ int main()
 	timeout.tv_sec = 10;
 	timeout.tv_usec = 10;
 
+
+	venc_main(0,0);
+
 	int *m = new int[1];
 	m[0] = 10;
 

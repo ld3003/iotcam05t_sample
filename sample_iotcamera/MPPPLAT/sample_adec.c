@@ -22,6 +22,8 @@
 
 #include <cdx_list.h>
 
+#define MAX_ACC_BUFFER_LENGTH 4096
+
 AUDIO_STREAM_S *SampleADecStreamManager_PrefetchFirstIdleStream(void *pThiz)
 {
     // Init output frame buffer
@@ -126,7 +128,7 @@ int initSampleADecStreamManager(SampleADecStreamManager *pStreamManager, int nSt
         pNode = malloc(sizeof(SampleADecStreamNode));
         memset(pNode, 0, sizeof(SampleADecStreamNode));
         pNode->mAStream.mId = i;
-        pNode->mAStream.mLen = 4096; // max size
+        pNode->mAStream.mLen = MAX_ACC_BUFFER_LENGTH; // max size
         pNode->mAStream.pStream = malloc(pNode->mAStream.mLen);
         list_add_tail(&pNode->mList, &pStreamManager->mIdleList);
     }
@@ -391,6 +393,8 @@ int map_FreqIdx_to_SampleRate(int idx)
         aloge("wrong frequence idx [%d]", idx);
         return 8000;
     }
+
+    return 44100;
 }
 
 void parseADTSHeader(SampleADecConfig *pConf, ADTSHeader *header)
@@ -464,7 +468,9 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     }
     read_len = fread(pStreamInfo->pStream, 1, bs_sz, fp);
 
-    //    aloge("zjx_frm:%d-%d",bs_sz,read_len);
+    //read_len = read_len * 2;
+    printf("ftell(fp_fopen) %ld \n", ftell(fp) );
+    aloge("@@@@@@@@@@@@@ zjx_frm:%d-%d", bs_sz, read_len);
     pStreamInfo->mLen = read_len;
     pStreamInfo->mId = id++;
     pStreamInfo->mTimeStamp = pts;
@@ -721,7 +727,7 @@ int adecmain(int argc, char *argv[])
     int nStreamSize;
     AUDIO_STREAM_S nStreamInfo;
     AUDIO_FRAME_S nFrameInfo;
-    nStreamInfo.pStream = malloc(4096); // max size
+    nStreamInfo.pStream = malloc(MAX_ACC_BUFFER_LENGTH); // max size
     if (NULL == nStreamInfo.pStream)
     {
         aloge("malloc_4k_failed");
