@@ -348,10 +348,14 @@ static ERRORTYPE loadSampleADecConfig(SampleADecConfig *pConfig, const char *con
     pConfig->mDecompressAudioFilePath[MAX_FILE_PATH_SIZE - 1] = '\0';
 
     pConfig->mType = PT_AAC; //GetConfParaInt(&stConfParser, SAMPLE_ADEC_DATA_TYPE, 0);
+
     //pConfig->mSampleRate = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_SAMPLE_RATE, 0);
     //pConfig->mBitWidth = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_BIT_WIDTH, 0);
     //pConfig->mChannelCnt = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_CHANNEL_CNT, 0);
     //pConfig->mStreamSize = GetConfParaInt(&stConfParser, SAMPLE_ADEC_PCM_Stream_SIZE, 0);
+    pConfig->mSampleRate = 44100;
+    pConfig->mBitWidth = 32;
+    pConfig->mChannelCnt = 2;
     //destroyConfParser(&stConfParser);
 
     return SUCCESS;
@@ -524,6 +528,16 @@ static void debug_buf(char *name, unsigned char *buf, int len)
     return 0;
 }
 
+typedef struct FLVAACADSTa{
+	unsigned char SamplIndex1:3;
+	unsigned char OBjecttype:5;//2
+ 
+	unsigned char other:3;//000
+	unsigned char channel:4;
+	unsigned char SamplIndex2:1;
+ 
+}FLVAACADST;
+
 int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig *pConf)
 {
     static int offset_i = 0;
@@ -534,6 +548,7 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     unsigned char *adata;
     int adatalen;
     char temp[7];
+    FLVAACADST flvadst;
 
 #if 1
 
@@ -545,9 +560,13 @@ RRRGET:
 
     if (adata[1] == 0)
     {
+        debug_buf("aac header frame ",adata, adatalen);
+        memcpy(&flvadst,adata+2,2);
+        printf("aaaa SamplIndex1=%d SamplIndex2=%d OBjecttype=%d channel =%d\r\n",flvadst.SamplIndex1,flvadst.SamplIndex2,flvadst.OBjecttype,flvadst.channel);
         free(adata);
         goto RRRGET;
     }
+
 
     debug_buf("rtmp aac",adata, adatalen);
     
@@ -560,10 +579,11 @@ RRRGET:
 #if 1
     pStreamInfo->mLen = adatalen-2+7;
     pStreamInfo->mId = id++;
+    
     pStreamInfo->mTimeStamp = pts;
     pts += 23;
     adatalen -= AACOFFSET;
-    return adatalen;
+    return adatalen-2+7;
 #endif
 #endif
 
@@ -624,6 +644,8 @@ int adecmain(int argc, char *argv[])
     alogd("Hello, sample_adec!");
 
     SampleADecContext stContext;
+
+    stContext.mConfigPara.mChannelCnt=2;
     initSampleADecContext(&stContext);
 
     // parse command line param
@@ -689,15 +711,15 @@ int adecmain(int argc, char *argv[])
 
     if (stContext.mConfigPara.mType == PT_G711U || stContext.mConfigPara.mType == PT_G711A)
     {
-        stContext.mAIOAttr.u32ChnCnt = 1;        //stContext.mConfigPara.mChannelCnt;
+        stContext.mAIOAttr.u32ChnCnt = 2;        //stContext.mConfigPara.mChannelCnt;
         stContext.mAIOAttr.enSamplerate = 44100; // (AUDIO_SAMPLE_RATE_E)stContext.mConfigPara.mSampleRate;
         stContext.mAIOAttr.enBitwidth = 16;      //(AUDIO_BIT_WIDTH_E)(stContext.mConfigPara.mBitWidth/8-1);
     }
     else
     {
-        stContext.mAIOAttr.u32ChnCnt = stContext.mConfigPara.mChannelCnt;
-        stContext.mAIOAttr.enSamplerate = (AUDIO_SAMPLE_RATE_E)stContext.mConfigPara.mSampleRate;
-        stContext.mAIOAttr.enBitwidth = (AUDIO_BIT_WIDTH_E)(stContext.mConfigPara.mBitWidth / 8 - 1);
+        stContext.mAIOAttr.u32ChnCnt = 2;
+        stContext.mAIOAttr.enSamplerate = 44100;
+        stContext.mAIOAttr.enBitwidth = 32;
     }
     stContext.mAIODev = 0;
     QG_MPI_AO_SetPubAttr(stContext.mAIODev, &stContext.mAIOAttr);

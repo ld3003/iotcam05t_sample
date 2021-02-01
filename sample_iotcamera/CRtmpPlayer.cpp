@@ -174,7 +174,10 @@ int CRtmpPlayer::run()
 
 		srs_human_trace("rtmp url: %s", "rtmp://r.ossrs.net/live/livestream");
 		//srs_rtmp_t rtmp = srs_rtmp_create("rtmp://58.200.131.2/livetv/cctv1");
-		srs_rtmp_t rtmp = srs_rtmp_create("rtmp://r.ossrs.net/live/livestream");
+		//
+		//srs_rtmp_t rtmp = srs_rtmp_create("rtmp://r.ossrs.net/live/livestream");
+		srs_rtmp_t rtmp = srs_rtmp_create("rtmp://120.78.230.169/live/test");
+
 
 		if (srs_rtmp_handshake(rtmp) != 0)
 		{
