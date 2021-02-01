@@ -57,6 +57,8 @@ SRCCS += $(wildcard ./rtsp/*.cpp)
 SRCCS += $(wildcard ./WEBSOCKET/*.cpp)
 SRCCS += $(wildcard ./mqtt/*.c)
 SRCCS += $(wildcard ./MPPPLAT/*.c)
+SRCCS += $(wildcard ./MPPPLAT/*.cpp)
+
 
 
 

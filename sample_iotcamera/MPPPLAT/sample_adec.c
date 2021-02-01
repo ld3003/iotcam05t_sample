@@ -452,8 +452,8 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     ADTSHeader header;
     unsigned char *adata;
     int adatalen;
-
     adatalen = getAudioData((unsigned char *)&adata);
+    printf("getAudioData %d \n",adatalen);
 
     if (pConf->mType == PT_G711U || pConf->mType == PT_G711A)
     {
