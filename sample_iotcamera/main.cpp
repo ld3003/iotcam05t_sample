@@ -187,11 +187,13 @@ int main()
 	timeout.tv_sec = 10;
 	timeout.tv_usec = 10;
 
+	initMpp();
+
 
 	CRtmpPlayer * player = new CRtmpPlayer();
 	player->start();
 
-	for(;;){sleep(1000);};
+	//for(;;){sleep(1000);};
 
 
 	venc_main(0,0);

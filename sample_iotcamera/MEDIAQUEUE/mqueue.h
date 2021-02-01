@@ -88,6 +88,10 @@ public:
         pthread_cond_init(&full, NULL);
         pthread_cond_init(&empty, NULL);
     }
+    int getSize()
+    {
+        return q.size();
+    }
     void PushData(const DATAPOINTER &data)
     {
         LockQueue();

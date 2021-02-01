@@ -444,16 +444,55 @@ int parseAudioFile(SampleADecConfig *pConf, FILE *fp)
     return ret;
 }
 
+static void debug_buf(char *name, unsigned char *buf, int len)
+{
+    int i = 0;
+    printf("aac decode [%s] :\n", name);
+    for (i = 0; i < len; i++)
+    {
+        printf("%02x ", buf[i]);
+    }
+    printf("\n\n");
+    return 0;
+}
+
 int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig *pConf)
 {
+    static int offset_i = 0;
     static int id;
     static long long pts;
     int read_len, pkt_sz, bs_sz;
     ADTSHeader header;
     unsigned char *adata;
     int adatalen;
-    adatalen = getAudioData((unsigned char *)&adata);
-    printf("getAudioData %d \n",adatalen);
+#if 1
+
+#define AACOFFSET offset_i
+
+RRRGET:
+    adatalen = getAudioData((unsigned char *)(&adata));
+    printf("getAudioData offset_ioffset_ioffset_i  %d \n", offset_i);
+
+    if (adata[1] == 0)
+    {
+        free(adata);
+        goto RRRGET;
+    }
+
+    debug_buf("rtmp aac",adata, adatalen);
+
+    memcpy(pStreamInfo->pStream, adata + AACOFFSET, adatalen - AACOFFSET);
+    free(adata);
+#if 1
+    pStreamInfo->mLen = adatalen;
+    pStreamInfo->mId = id++;
+    pStreamInfo->mTimeStamp = pts;
+    pts += 23;
+    adatalen -= AACOFFSET;
+    offset_i++;
+    return adatalen;
+#endif
+#endif
 
     if (pConf->mType == PT_G711U || pConf->mType == PT_G711A)
     {
@@ -462,6 +501,7 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     else
     {
         read_len = fread(&header, 1, pConf->mHeaderLen, fp);
+        debug_buf("aac hdr", &header, pConf->mHeaderLen);
         if (0 == read_len)
         {
             aloge("zjx_err:%d", pConf->mHeaderLen);
@@ -472,6 +512,8 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
         bs_sz = pkt_sz - pConf->mHeaderLen;
     }
     read_len = fread(pStreamInfo->pStream, 1, bs_sz, fp);
+
+    debug_buf("aac data", pStreamInfo->pStream, bs_sz);
 
     //read_len = read_len * 2;
     printf("ftell(fp_fopen) %ld \n", ftell(fp));
@@ -574,9 +616,9 @@ int adecmain(int argc, char *argv[])
 
     if (stContext.mConfigPara.mType == PT_G711U || stContext.mConfigPara.mType == PT_G711A)
     {
-        stContext.mAIOAttr.u32ChnCnt = 1;       //stContext.mConfigPara.mChannelCnt;
-        stContext.mAIOAttr.enSamplerate = 8000; // (AUDIO_SAMPLE_RATE_E)stContext.mConfigPara.mSampleRate;
-        stContext.mAIOAttr.enBitwidth = 16;     //(AUDIO_BIT_WIDTH_E)(stContext.mConfigPara.mBitWidth/8-1);
+        stContext.mAIOAttr.u32ChnCnt = 1;        //stContext.mConfigPara.mChannelCnt;
+        stContext.mAIOAttr.enSamplerate = 44100; // (AUDIO_SAMPLE_RATE_E)stContext.mConfigPara.mSampleRate;
+        stContext.mAIOAttr.enBitwidth = 16;      //(AUDIO_BIT_WIDTH_E)(stContext.mConfigPara.mBitWidth/8-1);
     }
     else
     {
@@ -798,10 +840,12 @@ int adecmain(int argc, char *argv[])
             //            break;
         }
 
-        if (!file_end)
+        //if (!file_end)
+        if (1)
         {
             // send stream to adec
             int nWaitTimeMs = 5 * 1000;
+            alogw("xxxsend StreamId[%d] with [%d]ms timeout fail?!", nStreamInfo.mId, nWaitTimeMs);
             ret = QG_MPI_ADEC_SendStream(stContext.mADecChn, &nStreamInfo, nWaitTimeMs);
             if (ret != SUCCESS)
             {

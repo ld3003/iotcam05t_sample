@@ -20,6 +20,8 @@
 #include <linux/socket.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#include "MPPPLAT/mppplat.h"
 /////////////////////////////////////////
 
 #define PUSH_FILE 0
@@ -164,60 +166,69 @@ void CRtmpPlayer::startPush()
 int CRtmpPlayer::run()
 {
 
-	printf("suck rtmp stream like rtmpdump\n");
-	printf("ossrs/srs client librtmp library.\n");
-	printf("version: %d.%d.%d\n", srs_version_major(), srs_version_minor(), srs_version_revision());
-
-
-	srs_human_trace("rtmp url: %s", "rtmp://r.ossrs.net/live/livestream");
-	srs_rtmp_t rtmp = srs_rtmp_create("rtmp://r.ossrs.net/live/livestream");
-
-	if (srs_rtmp_handshake(rtmp) != 0)
-	{
-		srs_human_trace("simple handshake failed.");
-		goto rtmp_destroy;
-	}
-	srs_human_trace("simple handshake success");
-
-	if (srs_rtmp_connect_app(rtmp) != 0)
-	{
-		srs_human_trace("connect vhost/app failed.");
-		goto rtmp_destroy;
-	}
-	srs_human_trace("connect vhost/app success");
-
-	if (srs_rtmp_play_stream(rtmp) != 0)
-	{
-		srs_human_trace("play stream failed.");
-		goto rtmp_destroy;
-	}
-	srs_human_trace("play stream success");
-
 	for (;;)
 	{
-		int size;
-		char type;
-		char *data;
-		u_int32_t timestamp, pts;
+		printf("suck rtmp stream like rtmpdump\n");
+		printf("ossrs/srs client librtmp library.\n");
+		printf("version: %d.%d.%d\n", srs_version_major(), srs_version_minor(), srs_version_revision());
 
-		if (srs_rtmp_read_packet(rtmp, &type, &timestamp, &data, &size) != 0)
+		srs_human_trace("rtmp url: %s", "rtmp://r.ossrs.net/live/livestream");
+		srs_rtmp_t rtmp = srs_rtmp_create("rtmp://58.200.131.2/livetv/cctv1");
+		//srs_rtmp_t rtmp = srs_rtmp_create("rtmp://r.ossrs.net/live/livestream");
+
+		if (srs_rtmp_handshake(rtmp) != 0)
 		{
+			srs_human_trace("simple handshake failed.");
 			goto rtmp_destroy;
 		}
-		if (srs_utils_parse_timestamp(timestamp, type, data, size, &pts) != 0)
+		srs_human_trace("simple handshake success");
+
+		if (srs_rtmp_connect_app(rtmp) != 0)
 		{
+			srs_human_trace("connect vhost/app failed.");
 			goto rtmp_destroy;
 		}
-		srs_human_trace("got packet: type=%s, dts=%d, pts=%d, size=%d",
-						srs_human_flv_tag_type2string(type), timestamp, pts, size);
+		srs_human_trace("connect vhost/app success");
 
-		free(data);
+		if (srs_rtmp_play_stream(rtmp) != 0)
+		{
+			srs_human_trace("play stream failed.");
+			goto rtmp_destroy;
+		}
+		srs_human_trace("play stream success");
+
+		for (;;)
+		{
+			int size;
+			char type;
+			char *data;
+			u_int32_t timestamp, pts;
+
+			if (srs_rtmp_read_packet(rtmp, &type, &timestamp, &data, &size) != 0)
+			{
+				goto rtmp_destroy;
+			}
+			if (srs_utils_parse_timestamp(timestamp, type, data, size, &pts) != 0)
+			{
+				goto rtmp_destroy;
+			}
+			//srs_human_trace("got packet: type=%s, dts=%d, pts=%d, size=%d", srs_human_flv_tag_type2string(type), timestamp, pts, size);
+
+			if (type == 8)
+			{
+				srs_human_print_rtmp_packet(type, timestamp, data, size);
+				setAudioData((unsigned char *)data, size);
+			}
+			else
+			{
+
+				free(data);
+			}
+		}
+
+	rtmp_destroy:
+		srs_rtmp_destroy(rtmp);
 	}
-
-rtmp_destroy:
-	srs_rtmp_destroy(rtmp);
-
-
 }
 
 int CRtmpPlayer::writeH264RawData(unsigned char *dat, int len, int pts)
