@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define NUM 8
+#define NUM 180
 
 // #define DEBUGOPEN
 

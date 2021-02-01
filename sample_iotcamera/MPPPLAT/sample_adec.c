@@ -443,7 +443,75 @@ int parseAudioFile(SampleADecConfig *pConf, FILE *fp)
 
     return ret;
 }
+#define ADTS_HEADER_SIZE 7
+#define ADTS_MAX_FRAME_BYTES ((1 << 13) - 1)
+void AddADTS(int i_nPktLen,char* m_pOutData)
+{
+    int nProfile = 1;   // AAC LC, 低复杂度规格
+    int nFreqIdx = 5;   // default 44.1kHz
+    int nChanCfg = 2;
 
+    int m_nPcmSampleRate=44100;
+    if(i_nPktLen > ADTS_MAX_FRAME_BYTES)
+    {
+        fprintf(stderr, "ADTS frame size too large: %d (max %d)\n", i_nPktLen, ADTS_MAX_FRAME_BYTES);
+        return;
+    }
+
+    switch(m_nPcmSampleRate)
+    {
+    case 96000:
+        nFreqIdx = 0;
+        break;
+    case 88200:
+        nFreqIdx = 1;
+        break;
+    case 64000:
+        nFreqIdx = 2;
+        break;
+    case 48000:
+        nFreqIdx = 3;
+        break;
+    case 44100:
+        nFreqIdx = 4;
+        break;
+    case 32000:
+        nFreqIdx = 5;
+        break;
+    case 24000:
+        nFreqIdx = 6;
+        break;
+    case 22050:
+        nFreqIdx = 7;
+        break;
+    case 16000:
+        nFreqIdx = 8;
+        break;
+    case 12000:
+        nFreqIdx = 9;
+        break;
+    case 11025:
+        nFreqIdx = 10;
+        break;
+    case 8000:
+        nFreqIdx = 11;
+        break;
+    case 7350:
+        nFreqIdx = 12;
+        break;
+    default:
+        break;
+    }
+
+    // Fill in ADTS header, 7 bytes
+    m_pOutData[0] = 0xFF;
+    m_pOutData[1] = 0xF1;
+    m_pOutData[2] = ((nProfile) << 6) + (nFreqIdx << 2) + (nChanCfg >> 2);
+    m_pOutData[3] = (((nChanCfg & 3) << 6) + (i_nPktLen >> 11));
+    m_pOutData[4] = ((i_nPktLen & 0x7FF) >> 3);
+    m_pOutData[5] = (((i_nPktLen & 7) << 5) + 0x1F);
+    m_pOutData[6] = 0xFC;
+}
 static void debug_buf(char *name, unsigned char *buf, int len)
 {
     int i = 0;
@@ -465,13 +533,15 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     ADTSHeader header;
     unsigned char *adata;
     int adatalen;
+    char temp[7];
+
 #if 1
 
-#define AACOFFSET offset_i
+#define  AACOFFSET 2
 
 RRRGET:
     adatalen = getAudioData((unsigned char *)(&adata));
-    printf("getAudioData offset_ioffset_ioffset_i  %d \n", offset_i);
+    printf("getAudioData offset_ioffset_ioffset_i  %d \n", AACOFFSET);
 
     if (adata[1] == 0)
     {
@@ -480,16 +550,19 @@ RRRGET:
     }
 
     debug_buf("rtmp aac",adata, adatalen);
+    
+    AddADTS(adatalen-2+7,temp);
+    memcpy(pStreamInfo->pStream,temp,7);
+    debug_buf("aac header .....",temp,7);
 
-    memcpy(pStreamInfo->pStream, adata + AACOFFSET, adatalen - AACOFFSET);
+    memcpy(pStreamInfo->pStream+7, adata + AACOFFSET, adatalen - AACOFFSET);
     free(adata);
 #if 1
-    pStreamInfo->mLen = adatalen;
+    pStreamInfo->mLen = adatalen-2+7;
     pStreamInfo->mId = id++;
     pStreamInfo->mTimeStamp = pts;
     pts += 23;
     adatalen -= AACOFFSET;
-    offset_i++;
     return adatalen;
 #endif
 #endif
