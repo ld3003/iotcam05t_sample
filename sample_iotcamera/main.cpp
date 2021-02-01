@@ -6,6 +6,7 @@
 #include "wifi/wifi_sta.h"
 #include "event.h"
 #include "MPPPLAT/mppplat.h"
+#include "CRtmpPlayer.h"
 
 static struct timeval CLOCK_TV;
 
@@ -185,6 +186,12 @@ int main()
 	struct timeval timeout;
 	timeout.tv_sec = 10;
 	timeout.tv_usec = 10;
+
+
+	CRtmpPlayer * player = new CRtmpPlayer();
+	player->start();
+
+	for(;;){sleep(1000);};
 
 
 	venc_main(0,0);

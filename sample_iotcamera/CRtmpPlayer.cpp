@@ -154,88 +154,70 @@ void CRtmpPlayer::startPush()
 	run_status = CRtmpPlayer::RUN_STATUS_START;
 }
 
-#define CHECK_RUNSTATUS                           \
+#define CHECK_RUNSTATUS                             \
 	if (run_status == CRtmpPlayer::RUN_STATUS_EXIT) \
-	{                                             \
-		deinit();                                 \
+	{                                               \
+		deinit();                                   \
 		status = CRtmpPlayer::STOPPUSH;             \
 	};
 
 int CRtmpPlayer::run()
 {
 
+	printf("suck rtmp stream like rtmpdump\n");
+	printf("ossrs/srs client librtmp library.\n");
+	printf("version: %d.%d.%d\n", srs_version_major(), srs_version_minor(), srs_version_revision());
+
+
+	srs_human_trace("rtmp url: %s", "rtmp://r.ossrs.net/live/livestream");
+	srs_rtmp_t rtmp = srs_rtmp_create("rtmp://r.ossrs.net/live/livestream");
+
+	if (srs_rtmp_handshake(rtmp) != 0)
+	{
+		srs_human_trace("simple handshake failed.");
+		goto rtmp_destroy;
+	}
+	srs_human_trace("simple handshake success");
+
+	if (srs_rtmp_connect_app(rtmp) != 0)
+	{
+		srs_human_trace("connect vhost/app failed.");
+		goto rtmp_destroy;
+	}
+	srs_human_trace("connect vhost/app success");
+
+	if (srs_rtmp_play_stream(rtmp) != 0)
+	{
+		srs_human_trace("play stream failed.");
+		goto rtmp_destroy;
+	}
+	srs_human_trace("play stream success");
+
 	for (;;)
 	{
+		int size;
+		char type;
+		char *data;
+		u_int32_t timestamp, pts;
 
-#ifndef NO_THREAD_LOCK
-		pthread_mutex_lock(&statusmutex);
-#endif
-
-		//printf("status %d run_status %d \n",status,run_status);
-
-		switch (status)
+		if (srs_rtmp_read_packet(rtmp, &type, &timestamp, &data, &size) != 0)
 		{
-
-		case CRtmpPlayer::STOPPUSH:
-			if (run_status == CRtmpPlayer::RUN_STATUS_START)
-				status = CRtmpPlayer::CONNINIT;
-			break;
-
-		case CRtmpPlayer::CONNINIT:
-
-			//关闭码流输出
-			printf("connect to server \n");
-			if (init() == 0)
-			{
-				printf("connect success \n");
-				status = CRtmpPlayer::CONNECTED;
-			}
-			else
-			{
-				printf("connect err \n");
-				deinit();
-				sleep(2);
-			}
-
-			if (run_status == CRtmpPlayer::RUN_STATUS_EXIT)
-			{
-				deinit();
-				status = CRtmpPlayer::STOPPUSH;
-			};
-
-			break;
-
-		case CRtmpPlayer::CONNECTED:
-			if (run_status == CRtmpPlayer::RUN_STATUS_EXIT)
-			{
-				deinit();
-				status = CRtmpPlayer::STOPPUSH;
-			};
-			break;
-
-		case CRtmpPlayer::CONNERR:
-			usleep(1000 * 100);
-			deinit();
-			status = CRtmpPlayer::CONNINIT;
-			if (run_status == CRtmpPlayer::RUN_STATUS_EXIT)
-			{
-				deinit();
-				status = CRtmpPlayer::STOPPUSH;
-			};
-			break;
-
-		default:
-			break;
+			goto rtmp_destroy;
 		}
+		if (srs_utils_parse_timestamp(timestamp, type, data, size, &pts) != 0)
+		{
+			goto rtmp_destroy;
+		}
+		srs_human_trace("got packet: type=%s, dts=%d, pts=%d, size=%d",
+						srs_human_flv_tag_type2string(type), timestamp, pts, size);
 
-#ifndef NO_THREAD_LOCK
-		pthread_mutex_unlock(&statusmutex);
-#endif
-		usleep(1000 * 100);
+		free(data);
 	}
 
-	printf("EXIT PUSH RTMP THREAD !\n");
-	return 0;
+rtmp_destroy:
+	srs_rtmp_destroy(rtmp);
+
+
 }
 
 int CRtmpPlayer::writeH264RawData(unsigned char *dat, int len, int pts)

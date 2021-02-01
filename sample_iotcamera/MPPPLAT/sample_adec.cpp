@@ -21,6 +21,7 @@
 #include "sample_adec.h"
 
 #include <cdx_list.h>
+#include "MPPPLAT/mppplat.h"
 
 #define MAX_ACC_BUFFER_LENGTH 4096
 
@@ -449,6 +450,10 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     static long long pts;
     int read_len, pkt_sz, bs_sz;
     ADTSHeader header;
+    unsigned char *adata;
+    int adatalen;
+
+    adatalen = getAudioData((unsigned char *)&adata);
 
     if (pConf->mType == PT_G711U || pConf->mType == PT_G711A)
     {
@@ -469,7 +474,7 @@ int extractStreamPacket(AUDIO_STREAM_S *pStreamInfo, FILE *fp, SampleADecConfig 
     read_len = fread(pStreamInfo->pStream, 1, bs_sz, fp);
 
     //read_len = read_len * 2;
-    printf("ftell(fp_fopen) %ld \n", ftell(fp) );
+    printf("ftell(fp_fopen) %ld \n", ftell(fp));
     aloge("@@@@@@@@@@@@@ zjx_frm:%d-%d", bs_sz, read_len);
     pStreamInfo->mLen = read_len;
     pStreamInfo->mId = id++;
@@ -735,6 +740,8 @@ int adecmain(int argc, char *argv[])
     }
     while (1)
     {
+
+#if 1
         // get stream from file
         nStreamSize = extractStreamPacket(&nStreamInfo, stContext.mFpAudioFile, &stContext.mConfigPara);
         if (0 == nStreamSize)
@@ -805,6 +812,10 @@ int adecmain(int argc, char *argv[])
         {
             file_end = 0;
         }
+
+#else
+        ret = QG_MPI_ADEC_SendStream(stContext.mADecChn, &nStreamInfo, nWaitTimeMs);
+#endif
 
         // get frame from adec
         //        while (QG_MPI_ADEC_GetFrame(stContext.mADecChn, &nFrameInfo, 0) != ERR_ADEC_BUF_EMPTY)

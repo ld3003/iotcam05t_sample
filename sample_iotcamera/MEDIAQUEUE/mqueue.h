@@ -27,11 +27,15 @@ public:
     {
         refcount--;
         if (refcount == 0)
+        {
             delete this;
+        }
     }
-    virtual int process(MQUEUE *mq, MDATA *md) = 0;
+    virtual int process(MQUEUE *mq, MDATA *md) { return 0; };
     int refcount;
     int mtype;
+    unsigned char *data;
+    int dlen;
 };
 
 class MQUEUE

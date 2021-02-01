@@ -1,17 +1,17 @@
 #ifndef __mppplat_h__
 #define __mppplat_h__
 
-#include "MEDIAQUEUE/mqueue.h"
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    int initMpp(){};
-    int setVideoEnc(int start) { return 0; };
-    int setAudioEnc(int start) { return 0; };
-    int registerMq(MQUEUE *mq);
+    int initMpp();
+    int setVideoEnc(int start);
+    int setAudioEnc(int start);
+
+    int setAudioData(unsigned char *audiodata, int len);
+    int getAudioData(unsigned char **audiodata);
 
 #ifdef __cplusplus
 }
